@@ -12,15 +12,15 @@
 
 ## Core
 
-### \`cnf.py\`
+### `cnf.py`
 
 Отвечает за формат задачи, DIMACS, сохранение трудных экземпляров и независимую проверку SAT-модели.
 
-### \`dpll.py\`
+### `dpll.py`
 
 Baseline. Нужен как простой контрольный алгоритм.
 
-### \`hybrid.py\`
+### `hybrid.py`
 
 Точный исследовательский solver. Он комбинирует несколько логически безопасных методов:
 
@@ -30,65 +30,65 @@ Baseline. Нужен как простой контрольный алгорит
 - UNSAT memoization;
 - DPLL branching.
 
-### \`canonical.py\`
+### `canonical.py`
 
 Даёт стабильный ключ остаточной формулы. Это позволяет узнавать уже исследованные состояния.
 
-### \`decomposition.py\`
+### `decomposition.py`
 
 Находит независимые компоненты по общим переменным.
 
 ## Experiment layer
 
-### \`generator.py\`
+### `generator.py`
 
 Создаёт random и planted 3-SAT.
 
-### \`experiments.py\`
+### `experiments.py`
 
 Запускает повторяемые серии, пишет CSV/JSON и считает summary.
 
-### \`complexity.py\`
+### `complexity.py`
 
 Сравнивает две простые эмпирические модели роста:
 
-\`\`\`text
+```text
 C * n^k
 C * a^n
-\`\`\`
+```
 
 Это только fit, не доказательство асимптотики.
 
-### \`hard_search.py\`
+### `hard_search.py`
 
 Пытается специально найти формулу, трудную для текущего solver-а.
 
-### \`verification.py\`
+### `verification.py`
 
 Сверяет независимые реализации на одинаковых входах. При установленном PySAT может включать внешний reference solver.
 
 ## Research layer
 
-### \`research_db.py\`
+### `research_db.py`
 
 SQLite-реестр гипотез.
 
 Статусы ограничены:
 
-\`\`\`text
+```text
 IDEA
 TESTING
 SURVIVED_TESTS
 COUNTEREXAMPLE_FOUND
 REJECTED
 PROOF_CANDIDATE
-\`\`\`
+```
 
-Статуса \`PROVED\` намеренно нет: его нельзя получить автоматически из серии тестов.
+Статуса `PROVED` намеренно нет: его нельзя получить автоматически из серии тестов.
 
 ## AI/MCP layer
 
-### \`mcp_server.py\`
+### `mcp_server.py`
 
 Даёт модели инструменты лаборатории, но не передаёт ей право объявлять математические результаты доказанными.
 
@@ -105,7 +105,7 @@ PROOF_CANDIDATE
 
 Будущая архитектура:
 
-\`\`\`text
+```text
                      CNF / SAT
                         |
                  feature analysis
@@ -121,6 +121,6 @@ PROOF_CANDIDATE
                  representation switch
                         |
                     verifier
-\`\`\`
+```
 
 Главный нерешённый теоретический вопрос: существует ли общий способ выбирать такие переходы так, чтобы размер состояния и время гарантированно оставались polynomial для всех 3-SAT.
