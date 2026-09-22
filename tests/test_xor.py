@@ -57,5 +57,60 @@ class TestXORRepresentation(unittest.TestCase):
         self.assertEqual(result.metrics.xor_equations_detected, 4)
 
 
+    def test_incomplete_xor_block_is_not_extracted(self):
+        equation = XOREquation((1, 2, 3), True)
+        incomplete = xor3_to_cnf(equation)[:3]
+        problem = CNFProblem(
+            variables=3,
+            clauses=incomplete,
+        )
+
+        remaining, equations = detect_xor3(problem)
+
+        self.assertEqual(equations, ())
+        self.assertEqual(remaining, problem)
+
+    def test_mixed_cnf_and_xor_matches_bruteforce(self):
+        from pnp_lab.bruteforce import solve_bruteforce
+
+        clauses = []
+        clauses.extend(
+            xor3_to_cnf(
+                XOREquation((1, 2, 3), True)
+            )
+        )
+        clauses.extend(
+            xor3_to_cnf(
+                XOREquation((3, 4, 5), False)
+            )
+        )
+        clauses.extend(
+            [
+                (1,),
+                (-5, 6),
+            ]
+        )
+
+        problem = CNFProblem(
+            variables=6,
+            clauses=tuple(clauses),
+        )
+
+        brute_sat, _ = solve_bruteforce(problem)
+        switched = RepresentationSwitchingSolver().solve(problem)
+
+        self.assertEqual(switched.sat, brute_sat)
+
+        if switched.sat:
+            self.assertTrue(
+                model_satisfies(problem, switched.model)
+            )
+
+        self.assertEqual(
+            switched.metrics.xor_equations_detected,
+            2,
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
