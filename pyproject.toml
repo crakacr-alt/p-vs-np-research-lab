@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "p-vs-np-research-lab"
+version = "0.1.0"
+description = "Учебно-исследовательская лаборатория для экспериментов с SAT и P vs NP."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+  {name = "crakacr-alt"}
+]
+dependencies = []
+
+[project.scripts]
+pnp-lab = "pnp_lab.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["pnp_lab*"]
