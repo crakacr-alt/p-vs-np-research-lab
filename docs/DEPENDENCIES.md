@@ -16,7 +16,9 @@
 pip install -e ".[mcp]"
 ```
 
-Версия: `mcp>=2,<3`.\n\nЗачем: даёт стандартный Model Context Protocol, чтобы AI-клиент мог запускать инструменты лаборатории. В 1.0 используется актуальный high-level класс `MCPServer` из SDK 2.x.
+Версия: `mcp>=2,<3`.
+
+Зачем: даёт стандартный Model Context Protocol, чтобы AI-клиент мог запускать инструменты лаборатории. В 1.0 используется актуальный high-level класс `MCPServer` из SDK 2.x.
 
 Где: `pnp_lab/mcp_server.py`.
 
