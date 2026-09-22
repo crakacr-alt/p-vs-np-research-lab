@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+title: P vs NP Research Lab
+message: "Если вы используете код или результаты проекта, укажите репозиторий и commit SHA."
+type: software
+authors:
+  - family-names: crakacr-alt
+version: 0.2.0
+repository-code: "https://github.com/crakacr-alt/p-vs-np-research-lab"

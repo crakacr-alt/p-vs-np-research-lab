@@ -1,51 +1,36 @@
 import unittest
 
-from pnp_lab.cnf import CNFProblem
-from pnp_lab.cnf import model_satisfies
+from pnp_lab.cnf import CNFProblem, model_satisfies
 from pnp_lab.dpll import DPLLSolver
+from pnp_lab.hybrid import HybridSolver
 
 
-class TestSolver(unittest.TestCase):
-    def test_sat(self):
-        problem = CNFProblem(
-            variables=2,
-            clauses=[
-                [1, 2],
-                [-1, 2],
-            ],
+class TestSolvers(unittest.TestCase):
+    def setUp(self):
+        self.sat_problem = CNFProblem(
+            variables=3,
+            clauses=((1, 2), (-1, 3), (-2, 3)),
         )
-
-        result = DPLLSolver().solve(
-            problem
-        )
-
-        self.assertTrue(
-            result.sat
-        )
-
-        self.assertTrue(
-            model_satisfies(
-                problem,
-                result.model,
-            )
-        )
-
-    def test_unsat(self):
-        problem = CNFProblem(
+        self.unsat_problem = CNFProblem(
             variables=1,
-            clauses=[
-                [1],
-                [-1],
-            ],
+            clauses=((1,), (-1,)),
         )
 
-        result = DPLLSolver().solve(
-            problem
-        )
+    def test_baseline_sat(self):
+        result = DPLLSolver().solve(self.sat_problem)
+        self.assertTrue(result.sat)
+        self.assertTrue(model_satisfies(self.sat_problem, result.model))
 
-        self.assertFalse(
-            result.sat
-        )
+    def test_baseline_unsat(self):
+        self.assertFalse(DPLLSolver().solve(self.unsat_problem).sat)
+
+    def test_hybrid_sat(self):
+        result = HybridSolver().solve(self.sat_problem)
+        self.assertTrue(result.sat)
+        self.assertTrue(model_satisfies(self.sat_problem, result.model))
+
+    def test_hybrid_unsat(self):
+        self.assertFalse(HybridSolver().solve(self.unsat_problem).sat)
 
 
 if __name__ == "__main__":
