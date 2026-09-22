@@ -2,7 +2,7 @@
 
 **P vs NP Research Lab** — открытый научно-исследовательский проект для воспроизводимых экспериментов с SAT, точными алгоритмами поиска, поиском трудных экземпляров и гипотезой о переключении представлений задачи.
 
-> **Статус:** исследовательская лаборатория, а не доказательство \`P = NP\` и не доказательство \`P != NP\`.
+> **Статус:** исследовательская лаборатория, а не доказательство `P = NP` и не доказательство `P != NP`.
 
 ## Научная цель
 
@@ -12,7 +12,7 @@
 
 Рабочая гипотеза называется **Polynomial Representation Switching** — «полиномиальное переключение представлений».
 
-Для доказательства \`P = NP\` недостаточно получить быстрые результаты на миллионах тестов. Нужен алгоритм с доказанной полиномиальной верхней границей для **всех** входов. Поэтому проект разделяет:
+Для доказательства `P = NP` недостаточно получить быстрые результаты на миллионах тестов. Нужен алгоритм с доказанной полиномиальной верхней границей для **всех** входов. Поэтому проект разделяет:
 
 - инженерное ускорение;
 - экспериментальное наблюдение;
@@ -33,12 +33,12 @@
 - генератор random 3-SAT;
 - генератор planted 3-SAT с известной моделью;
 - поиск трудных экземпляров через простой hill climbing;
-- воспроизводимые серии экспериментов с несколькими \`seed\`;
+- воспроизводимые серии экспериментов с несколькими `seed`;
 - сохранение сырых данных в CSV и параметров в JSON;
 - эмпирическое сравнение polynomial/exponential fit;
 - SQLite-журнал исследовательских гипотез;
 - независимая проверка SAT-моделей;
-- optional reference solver через \`python-sat\`;
+- optional reference solver через `python-sat`;
 - MCP server для подключения лаборатории к модели/агенту;
 - тесты и GitHub Actions.
 
@@ -46,101 +46,101 @@
 
 ### Linux / Ubuntu
 
-\`\`\`bash
+```bash
 git clone https://github.com/crakacr-alt/p-vs-np-research-lab.git
 cd p-vs-np-research-lab
 python3 -m venv .venv
 source .venv/bin/activate
 python3 -m pip install -e .
-\`\`\`
+```
 
 ### Windows PowerShell
 
-\`\`\`powershell
+```powershell
 git clone https://github.com/crakacr-alt/p-vs-np-research-lab.git
 cd p-vs-np-research-lab
 py -m venv .venv
 .venv\Scripts\Activate.ps1
 py -m pip install -e .
-\`\`\`
+```
 
 Проверка:
 
-\`\`\`bash
+```bash
 pnp-lab --help
-\`\`\`
+```
 
 ## Примеры
 
 Решить SAT:
 
-\`\`\`bash
+```bash
 pnp-lab solve examples/simple_sat.cnf
-\`\`\`
+```
 
 Сравнить простой DPLL и hybrid solver:
 
-\`\`\`bash
+```bash
 pnp-lab experiment --start 10 --stop 40 --step 5 --repeats 5
-\`\`\`
+```
 
 Результаты сохраняются в:
 
-\`\`\`text
+```text
 results/latest/results.csv
 results/latest/metadata.json
-\`\`\`
+```
 
 Искать трудный экземпляр:
 
-\`\`\`bash
+```bash
 pnp-lab hunt --variables 30 --clauses 126 --iterations 500
-\`\`\`
+```
 
 Проверить согласованность двух собственных solver-ов:
 
-\`\`\`bash
+```bash
 pnp-lab verify --variables 12 --clauses 50 --count 200
-\`\`\`
+```
 
 А с независимым PySAT:
 
-\`\`\`bash
+```bash
 pip install -e ".[reference]"
 pnp-lab verify --variables 12 --clauses 50 --count 200 --reference
-\`\`\`
+```
 
 Создать гипотезу:
 
-\`\`\`bash
+```bash
 pnp-lab hypothesis add \
   --title "H1: decomposition" \
   --statement "Разбиение независимых компонент уменьшает число ветвлений на декомпозируемых формулах"
-\`\`\`
+```
 
 Посмотреть журнал:
 
-\`\`\`bash
+```bash
 pnp-lab hypothesis list
-\`\`\`
+```
 
 ## MCP: подключить к модели за несколько минут
 
 Установить MCP-дополнение:
 
-\`\`\`bash
+```bash
 pip install -e ".[mcp]"
-\`\`\`
+```
 
 Проверить сервер:
 
-\`\`\`bash
+```bash
 pnp-lab-mcp
-\`\`\`
+```
 
 В конфигурацию любого MCP-совместимого клиента добавить примерно:
 
-\`\`\`json
+```json
 {
   "mcpServers": {
     "pnp-lab": {
@@ -149,20 +149,20 @@ pnp-lab-mcp
     }
   }
 }
-\`\`\`
+```
 
 После подключения модель получает инструменты:
 
-- \`project_status\`;
-- \`solve_cnf_file\`;
-- \`growth_experiment\`;
-- \`hunt_hard_case\`.
+- `project_status`;
+- `solve_cnf_file`;
+- `growth_experiment`;
+- `hunt_hard_case`.
 
 Подробно: [docs/MCP.md](docs/MCP.md).
 
 ## Архитектура
 
-\`\`\`text
+```text
                  DIMACS CNF
                      |
           +----------+----------+
@@ -184,7 +184,7 @@ pnp-lab-mcp
                         +--------------------------+-----------------+
                         |                          |                 |
                   CSV/JSON runs              hard search      hypotheses DB
-\`\`\`
+```
 
 Подробно: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
@@ -194,9 +194,9 @@ pnp-lab-mcp
 
 Сейчас core работает без сторонних runtime-зависимостей. Дополнения:
 
-- \`mcp\` — только для подключения к AI/агентам;
-- \`python-sat\` — только для независимой сверки с промышленным solver;
-- \`ruff\` — только для разработки и CI.
+- `mcp` — только для подключения к AI/агентам;
+- `python-sat` — только для независимой сверки с промышленным solver;
+- `ruff` — только для разработки и CI.
 
 Подробно: [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md).
 
@@ -230,16 +230,16 @@ pnp-lab-mcp
 
 ## Проверка
 
-\`\`\`bash
+```bash
 python -m unittest discover -s tests -v
-\`\`\`
+```
 
 Для проверки стиля:
 
-\`\`\`bash
+```bash
 pip install -e ".[dev]"
 ruff check pnp_lab tests
-\`\`\`
+```
 
 ## Что будет считаться серьёзным результатом
 
@@ -247,4 +247,4 @@ ruff check pnp_lab tests
 
 Сильный теоретический результат: доказанная граница для нового класса формул или доказанное свойство переключения представлений.
 
-Решение \`P vs NP\`: только строгий доказанный общий результат, прошедший независимую математическую проверку.
+Решение `P vs NP`: только строгий доказанный общий результат, прошедший независимую математическую проверку.
