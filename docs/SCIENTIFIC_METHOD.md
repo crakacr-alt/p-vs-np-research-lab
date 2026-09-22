@@ -16,7 +16,7 @@
 
 Для каждого улучшения нужен baseline.
 
-В v0.2 baseline — простой DPLL.
+В v1.0 baseline — простой DPLL.
 
 ## 3. Одинаковые входы
 
@@ -48,6 +48,8 @@
 - cache hits;
 - decompositions;
 - max depth;
+- XOR equations detected;
+- representation switches;
 - wall-clock time.
 
 Логические счётчики обычно воспроизводимее времени.

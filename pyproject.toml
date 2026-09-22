@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "p-vs-np-research-lab"
-version = "0.2.0"
-description = "Исследовательская лаборатория для воспроизводимых экспериментов с SAT, точным поиском и гипотезами вокруг P vs NP."
+version = "1.0.0"
+description = "Научная лаборатория для воспроизводимых SAT-экспериментов и точного representation switching."
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
@@ -14,12 +14,10 @@ authors = [
 dependencies = []
 
 [project.optional-dependencies]
-# Нужен только для подключения проекта к MCP-совместимой модели/агенту.
-mcp = ["mcp>=1.0.0"]
-# Нужен только для независимой сверки результатов с промышленным SAT solver.
+mcp = ["mcp>=2.0,<3"]
 reference = ["python-sat"]
-# Нужен только разработчику: статическая проверка стиля и простых ошибок.
 dev = ["ruff>=0.6"]
+release = ["build>=1.2", "twine>=6"]
 
 [project.scripts]
 pnp-lab = "pnp_lab.cli:main"

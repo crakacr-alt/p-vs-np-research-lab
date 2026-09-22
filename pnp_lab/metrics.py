@@ -5,8 +5,8 @@ from dataclasses import asdict, dataclass
 class SolverMetrics:
     """Счётчики, которые помогают сравнивать алгоритмы.
 
-    Время само по себе шумное: оно зависит от компьютера и нагрузки.
-    Поэтому отдельно считаются логические операции поиска.
+    Время зависит от компьютера и текущей нагрузки. Поэтому рядом со временем
+    считаются логические операции поиска.
     """
 
     decisions: int = 0
@@ -16,6 +16,10 @@ class SolverMetrics:
     cache_hits: int = 0
     decompositions: int = 0
     max_depth: int = 0
+    xor_equations_detected: int = 0
+    xor_propagations: int = 0
+    xor_direct_solves: int = 0
+    representation_switches: int = 0
     seconds: float = 0.0
 
     def to_dict(self) -> dict:
