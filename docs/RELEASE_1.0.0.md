@@ -54,7 +54,7 @@ CI проверяет:
 - Ruff;
 - optional PySAT reference;
 - brute-force differential check;
-- установку MCP и создание FastMCP server.
+- установку MCP SDK 2.x и создание MCPServer.
 
 ## Ограничение интерпретации
 
