@@ -300,6 +300,7 @@ C:\...\p-vs-np-research-lab\.venv\Scripts\python.exe
 - [Литература](docs/REFERENCES.md)
 - [Roadmap](ROADMAP.md)
 - [История изменений](CHANGELOG.md)
+- [Безопасность](SECURITY.md)
 - [Release notes 1.0](docs/RELEASE_1.0.0.md)
 
 ## Проверка
