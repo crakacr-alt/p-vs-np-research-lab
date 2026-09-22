@@ -18,13 +18,13 @@ from .workspace import safe_workspace_path
 
 def build_server():
     try:
-        from mcp.server.fastmcp import FastMCP
+        from mcp.server import MCPServer
     except ImportError as error:
         raise RuntimeError(
-            'MCP не установлен. Выполните: pip install -e ".[mcp]"'
+            'MCP SDK 2.x не установлен. Выполните: pip install -e ".[mcp]"'
         ) from error
 
-    mcp = FastMCP("p-vs-np-research-lab")
+    mcp = MCPServer("p-vs-np-research-lab")
 
     @mcp.tool()
     def project_status() -> dict:
