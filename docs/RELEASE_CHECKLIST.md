@@ -18,7 +18,8 @@
 - [x] Есть scientific-method documentation.
 - [x] Есть limitations documentation.
 - [x] Есть changelog.
+- [x] Wheel/sdist собираются и проходят `twine check`.
 - [x] Есть release notes.
-- [ ] GitHub Actions release branch должен завершиться успешно.
-- [ ] После зелёного CI записать итог release benchmark в журнал экспериментов.
-- [ ] После этого merge в main.
+- [x] GitHub Actions release branch завершился успешно: Python 3.10/3.12/3.13, PySAT, brute force, MCP, Ruff и package-check.
+- [x] Итог release benchmark записан в `research/EXPERIMENT_LOG.md` как E0002.
+- [x] Release candidate прошёл все проверки и готов к merge в `main` через PR #5.
