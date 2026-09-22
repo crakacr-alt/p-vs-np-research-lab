@@ -1,126 +1,149 @@
-# Архитектура
+# Архитектура проекта 1.0
 
-## Принцип
+## Основной принцип
 
-Архитектура разделяет три вещи:
+Проект разделён на четыре слоя:
 
-1. **точное решение**;
-2. **экспериментальную инфраструктуру**;
-3. **исследовательские гипотезы**.
+1. exact solving;
+2. representation switching;
+3. scientific experiments;
+4. AI/MCP orchestration.
 
-Это важно: экспериментальный модуль не имеет права превращать «быстро сработало» в утверждение «доказано».
+Ни один верхний слой не должен подменять корректность нижнего.
 
-## Core
+## Exact solving
 
 ### `cnf.py`
 
-Отвечает за формат задачи, DIMACS, сохранение трудных экземпляров и независимую проверку SAT-модели.
+- структура CNF;
+- DIMACS import/export;
+- независимая проверка SAT model.
 
 ### `dpll.py`
 
-Baseline. Нужен как простой контрольный алгоритм.
+Простой baseline.
 
 ### `hybrid.py`
 
-Точный исследовательский solver. Он комбинирует несколько логически безопасных методов:
+Точный solver с:
 
 - unit propagation;
 - pure literal elimination;
-- component decomposition;
+- independent component decomposition;
 - UNSAT memoization;
 - DPLL branching.
 
-### `canonical.py`
+### `bruteforce.py`
 
-Даёт стабильный ключ остаточной формулы. Это позволяет узнавать уже исследованные состояния.
+Медленный независимый oracle для маленьких задач.
 
-### `decomposition.py`
+## Representation layer
 
-Находит независимые компоненты по общим переменным.
+### `xor.py`
 
-## Experiment layer
+- распознаёт точную XOR3-кодировку в CNF;
+- хранит `XOREquation`;
+- выполняет Gaussian elimination над GF(2);
+- выводит XOR unit assignments;
+- строит одно решение линейной системы.
 
-### `generator.py`
+### `switch_solver.py`
 
-Создаёт random и planted 3-SAT.
+Связывает CNF и XOR.
+
+```text
+original CNF
+    |
+detect XOR3
+    |
+    +--> remaining CNF ----+
+    |                      |
+    +--> XOR equations ----+
+                           |
+                      shared model
+                           |
+                SAT / UNSAT + metrics
+```
+
+Это первый working representation switch проекта.
+
+## Benchmark layer
+
+### `benchmarks.py`
+
+Структурные семейства:
+
+- random 3-SAT;
+- Pigeonhole Principle;
+- independent components;
+- XOR chains;
+- inconsistent XOR core.
+
+### `benchmark_runner.py`
+
+Одинаковые задачи прогоняются через несколько solver-ов.
+
+Сохраняются:
+
+- CSV;
+- JSON;
+- Markdown report.
 
 ### `experiments.py`
 
-Запускает повторяемые серии, пишет CSV/JSON и считает summary.
+Growth experiment по размеру random 3-SAT.
 
 ### `complexity.py`
 
-Сравнивает две простые эмпирические модели роста:
+Empirical fit:
 
-```text
-C * n^k
-C * a^n
-```
+- `C*n^k`;
+- `C*a^n`.
 
-Это только fit, не доказательство асимптотики.
+Fit не считается доказательством асимптотики.
 
 ### `hard_search.py`
 
-Пытается специально найти формулу, трудную для текущего solver-а.
+Adversarial search против текущего solver-а.
+
+## Verification layer
 
 ### `verification.py`
 
-Сверяет независимые реализации на одинаковых входах. При установленном PySAT может включать внешний reference solver.
+Сравнивает:
+
+- DPLL;
+- Hybrid;
+- RepresentationSwitchingSolver;
+- brute force, если включён;
+- PySAT, если установлен.
 
 ## Research layer
 
 ### `research_db.py`
 
-SQLite-реестр гипотез.
+SQLite-журнал гипотез.
 
-Статусы ограничены:
+Нет автоматического статуса `PROVED`.
 
-```text
-IDEA
-TESTING
-SURVIVED_TESTS
-COUNTEREXAMPLE_FOUND
-REJECTED
-PROOF_CANDIDATE
-```
-
-Статуса `PROVED` намеренно нет: его нельзя получить автоматически из серии тестов.
-
-## AI/MCP layer
+## MCP layer
 
 ### `mcp_server.py`
 
-Даёт модели инструменты лаборатории, но не передаёт ей право объявлять математические результаты доказанными.
+AI получает ограниченный набор научных инструментов.
 
-Модель может:
+### `workspace.py`
 
-- запускать solver;
-- проводить эксперимент;
-- искать стресс-тест;
-- анализировать результаты.
+Файлы MCP разрешены только внутри `PNP_LAB_WORKSPACE`.
 
-Корректность решения остаётся задачей точного кода и независимой проверки.
+Это важно, потому что исследовательскому агенту не нужен произвольный доступ к
+остальной файловой системе.
 
-## Направление будущего representation switching
+## Почему не всё сделано одним solver-ом
 
-Будущая архитектура:
+Для исследования важно видеть, какое улучшение что меняет.
 
-```text
-                     CNF / SAT
-                        |
-                 feature analysis
-                        |
-        +---------------+----------------+
-        |               |                |
-      CDCL             XOR             Graph
-        |               |                |
-        +---------------+----------------+
-                        |
-              exact equivalence checks
-                        |
-                 representation switch
-                        |
-                    verifier
-```
+Если сразу использовать огромный black-box solver, трудно понять причину
+ускорения.
 
-Главный нерешённый теоретический вопрос: существует ли общий способ выбирать такие переходы так, чтобы размер состояния и время гарантированно оставались polynomial для всех 3-SAT.
+Поэтому baseline, hybrid и switch существуют отдельно.

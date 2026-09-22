@@ -1,0 +1,24 @@
+# Release checklist 1.0.0
+
+- [x] Версия проекта поднята до 1.0.0.
+- [x] Есть baseline DPLL.
+- [x] Есть exact Hybrid solver.
+- [x] Есть первый exact representation switch.
+- [x] Есть независимая проверка SAT model.
+- [x] Есть brute-force oracle.
+- [x] Есть optional external PySAT reference.
+- [x] Есть random и structured benchmarks.
+- [x] Есть hard-case search.
+- [x] Есть reproducible seed/repeats.
+- [x] Есть CSV/JSON/Markdown output.
+- [x] Есть hypothesis database.
+- [x] Есть MCP interface.
+- [x] MCP ограничен workspace.
+- [x] Есть doctor command.
+- [x] Есть scientific-method documentation.
+- [x] Есть limitations documentation.
+- [x] Есть changelog.
+- [x] Есть release notes.
+- [ ] GitHub Actions release branch должен завершиться успешно.
+- [ ] После зелёного CI записать итог release benchmark в журнал экспериментов.
+- [ ] После этого merge в main.

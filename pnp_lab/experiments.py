@@ -10,6 +10,7 @@ from .complexity import fit_exponential, fit_polynomial
 from .dpll import DPLLSolver
 from .generator import random_3sat
 from .hybrid import HybridSolver
+from .switch_solver import RepresentationSwitchingSolver
 
 
 @dataclass
@@ -27,6 +28,10 @@ class ExperimentRow:
     cache_hits: int
     decompositions: int
     max_depth: int
+    xor_equations_detected: int
+    xor_propagations: int
+    xor_direct_solves: int
+    representation_switches: int
     seconds: float
 
 
@@ -37,7 +42,10 @@ def _make_solver(name):
     if name == "hybrid":
         return HybridSolver()
 
-    raise ValueError("Неизвестный solver. Используйте: dpll или hybrid")
+    if name == "switch":
+        return RepresentationSwitchingSolver()
+
+    raise ValueError("Неизвестный solver. Используйте: dpll, hybrid или switch")
 
 
 def run_growth_experiment(
@@ -47,7 +55,7 @@ def run_growth_experiment(
     repeats: int = 5,
     ratio: float = 4.2,
     seed: int = 1,
-    solvers=("dpll", "hybrid"),
+    solvers=("dpll", "hybrid", "switch"),
 ):
     """Запускает воспроизводимый сравнительный эксперимент."""
 
@@ -79,6 +87,10 @@ def run_growth_experiment(
                         cache_hits=metrics.cache_hits,
                         decompositions=metrics.decompositions,
                         max_depth=metrics.max_depth,
+                        xor_equations_detected=metrics.xor_equations_detected,
+                        xor_propagations=metrics.xor_propagations,
+                        xor_direct_solves=metrics.xor_direct_solves,
+                        representation_switches=metrics.representation_switches,
                         seconds=metrics.seconds,
                     )
                 )
@@ -125,6 +137,9 @@ def summarize_growth(rows, solver_name, cost_field="calls"):
 
 def save_experiment(rows, output_dir, metadata=None):
     """Сохраняет сырые данные в CSV и метаданные в JSON."""
+
+    if not rows:
+        raise ValueError("Нельзя сохранить пустой эксперимент")
 
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
