@@ -91,7 +91,10 @@ def benchmark_command(args):
     print("Release benchmark завершён.")
     print(f"CSV: {csv_path}")
     print(f"JSON: {json_path}")
-    print(f"Report: {report_path}")\n    print()\n    print(report_path.read_text(encoding="utf-8"))\n
+    print(f"Report: {report_path}")
+    print()
+    print(report_path.read_text(encoding="utf-8"))
+
 
 def hunt_command(args):
     case = search_hard_case(
