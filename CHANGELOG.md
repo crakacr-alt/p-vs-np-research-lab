@@ -21,7 +21,9 @@
 - добавлена команда `pnp-lab benchmark`;
 - solver `switch` стал стандартным в CLI;
 - MCP расширен benchmark/hypothesis инструментами;
-- MCP file access ограничен `PNP_LAB_WORKSPACE`;\n- во время release candidate CI обнаружил несовместимость со старым FastMCP import; код мигрирован на стабильный MCP Python SDK 2.x (`MCPServer`).\n
+- MCP file access ограничен `PNP_LAB_WORKSPACE`;
+- во время release candidate CI обнаружил несовместимость со старым FastMCP import; код мигрирован на стабильный MCP Python SDK 2.x (`MCPServer`).
+
 ### Проверка качества
 
 - CI расширен на Python 3.10/3.12/3.13;
