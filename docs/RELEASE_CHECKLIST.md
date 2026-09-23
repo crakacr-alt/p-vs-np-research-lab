@@ -12,6 +12,6 @@
 - [x] `pnp-lab doctor` проверяет Turing Machine.
 - [x] Документация объясняет практическую и научную роль.
 - [x] Версия проекта поднята до 1.1.0.
-- [ ] GitHub Actions должны завершиться успешно.
-- [ ] Package build должен пройти.
-- [ ] После зелёного CI merge в main.
+- [x] GitHub Actions завершились успешно.
+- [x] Wheel/sdist, twine check и установка wheel прошли успешно.
+- [x] Release candidate готов к merge в main через PR #7.
