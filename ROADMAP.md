@@ -12,9 +12,16 @@
 - MCP research interface;
 - hypothesis log.
 
-## 1.1 — SAT research quality
+## 1.1 — Turing Machine + SAT research quality
 
-План:
+Готово:
+
+- детерминированная одно-ленточная Turing Machine;
+- JSON transition format;
+- CLI/MCP запуск;
+- trace и step counter.
+
+Дальше:
 
 - подключение современного CDCL solver как полноценного benchmark backend;
 - DRAT/LRAT proof certificates для UNSAT там, где backend их поддерживает;

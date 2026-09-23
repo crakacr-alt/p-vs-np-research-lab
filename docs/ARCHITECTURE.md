@@ -1,4 +1,4 @@
-# Архитектура проекта 1.0
+# Архитектура проекта 1.1
 
 ## Основной принцип
 
@@ -66,6 +66,22 @@ detect XOR3
 ```
 
 Это первый working representation switch проекта.
+
+## Computational model layer
+
+### `turing_machine.py`
+
+Отдельная формальная модель вычисления:
+
+- deterministic single-tape Turing Machine;
+- разреженная лента с отрицательными и положительными индексами;
+- JSON transition table;
+- accept/reject;
+- step limit;
+- trace.
+
+Этот слой не является частью SAT solver-а. Он нужен для связи экспериментов с
+классической теорией вычислимости и сложности.
 
 ## Benchmark layer
 

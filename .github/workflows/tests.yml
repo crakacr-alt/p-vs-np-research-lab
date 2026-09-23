@@ -32,6 +32,9 @@ jobs:
       - name: Структурный benchmark
         run: pnp-lab benchmark --output /tmp/pnp-release-benchmark
 
+      - name: Smoke-test машины Тьюринга
+        run: pnp-lab tm examples/turing_even_ones.json 1010
+
   reference-check:
     runs-on: ubuntu-latest
 
@@ -122,5 +125,5 @@ jobs:
       - name: Сохранить release artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: p-vs-np-research-lab-1.0.0
+          name: p-vs-np-research-lab-1.1.0
           path: dist/*

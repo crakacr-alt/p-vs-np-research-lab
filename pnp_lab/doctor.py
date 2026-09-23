@@ -5,6 +5,7 @@ from .cnf import CNFProblem, model_satisfies
 from .dpll import DPLLSolver
 from .hybrid import HybridSolver
 from .switch_solver import RepresentationSwitchingSolver
+from .turing_machine import Transition, TuringMachine
 
 
 @dataclass
@@ -14,7 +15,7 @@ class DoctorResult:
 
 
 def run_doctor():
-    """Быстрая самопроверка установки и основных solver-ов."""
+    """Быстрая самопроверка установки и основных компонентов."""
 
     checks = []
 
@@ -58,5 +59,25 @@ def run_doctor():
         return DoctorResult(False, checks + ["XOR detection did not activate"])
 
     checks.append("representation switch CNF -> XOR: OK")
+
+    machine = TuringMachine(
+        name="doctor-tm",
+        states={"q0", "qa"},
+        input_alphabet={"1"},
+        tape_alphabet={"1", "_"},
+        blank="_",
+        start_state="q0",
+        accept_states={"qa"},
+        reject_states=set(),
+        transitions={
+            ("q0", "1"): Transition("1", "S", "qa"),
+        },
+    )
+    tm_result = machine.run("1")
+
+    if tm_result.status != "ACCEPT":
+        return DoctorResult(False, checks + ["Turing Machine self-test failed"])
+
+    checks.append("deterministic Turing Machine: OK")
 
     return DoctorResult(True, checks)
