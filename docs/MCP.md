@@ -66,7 +66,7 @@ Windows command:
 C:\Projects\p-vs-np-research-lab\.venv\Scripts\python.exe
 ```
 
-## Инструменты 1.0
+## Инструменты 1.1
 
 ### `project_status`
 
@@ -91,6 +91,10 @@ Repeated random 3-SAT experiment.
 ### `hunt_hard_case(...)`
 
 Adversarial search и сохранение найденного CNF.
+
+### `run_turing_machine(machine_path, input_text, max_steps, trace)`
+
+Запускает JSON-машину Тьюринга внутри `PNP_LAB_WORKSPACE`.
 
 ### `add_hypothesis(...)`
 
@@ -121,6 +125,7 @@ pnp_lab.mcp_server
    +--> experiments
    +--> benchmarks
    +--> hard-case search
+   +--> Turing Machine
    +--> hypothesis memory
 ```
 

@@ -11,6 +11,7 @@ from .hard_search import search_hard_case
 from .hybrid import HybridSolver
 from .research_db import ALLOWED_STATUSES, ResearchDatabase
 from .switch_solver import RepresentationSwitchingSolver
+from .turing_machine import load_turing_machine
 from .verification import cross_check_random
 
 
@@ -154,6 +155,39 @@ def doctor_command(args):
     raise SystemExit(1)
 
 
+def turing_command(args):
+    machine = load_turing_machine(args.machine)
+    result = machine.run(
+        args.input,
+        max_steps=args.max_steps,
+        trace=args.trace,
+    )
+
+    print(f"machine: {result.machine}")
+    print(f"status: {result.status}")
+    print(f"accepted: {result.accepted}")
+    print(f"halted: {result.halted}")
+    print(f"steps: {result.steps}")
+    print(f"final_state: {result.final_state}")
+    print(f"head: {result.head}")
+    print(f"tape_start: {result.tape_start}")
+    print(f"tape: {result.tape}")
+
+    if args.trace:
+        print()
+        print("TRACE")
+
+        for item in result.trace:
+            print(
+                f"step={item.step} "
+                f"state={item.state} "
+                f"head={item.head} "
+                f"read={item.read} "
+                f"window_start={item.window_start} "
+                f"window={item.window}"
+            )
+
+
 def hypothesis_add_command(args):
     database = ResearchDatabase(args.db)
     hypothesis_id = database.add_hypothesis(args.title, args.statement, args.notes)
@@ -241,6 +275,16 @@ def build_parser():
         help="быстрая самопроверка установки",
     )
     doctor_parser.set_defaults(handler=doctor_command)
+
+    turing_parser = commands.add_parser(
+        "tm",
+        help="запустить детерминированную машину Тьюринга из JSON",
+    )
+    turing_parser.add_argument("machine", help="JSON-файл с описанием машины")
+    turing_parser.add_argument("input", nargs="?", default="", help="входная строка")
+    turing_parser.add_argument("--max-steps", type=int, default=10_000)
+    turing_parser.add_argument("--trace", action="store_true")
+    turing_parser.set_defaults(handler=turing_command)
 
     hypothesis = commands.add_parser("hypothesis", help="журнал исследовательских гипотез")
     hypothesis_commands = hypothesis.add_subparsers(dest="hypothesis_command", required=True)

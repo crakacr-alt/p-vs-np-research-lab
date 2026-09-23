@@ -1,0 +1,19 @@
+{
+  "name": "even-number-of-ones",
+  "description": "Принимает бинарную строку, если число единиц в ней чётное.",
+  "states": ["q_even", "q_odd", "q_accept", "q_reject"],
+  "input_alphabet": ["0", "1"],
+  "tape_alphabet": ["0", "1", "_"],
+  "blank": "_",
+  "start_state": "q_even",
+  "accept_states": ["q_accept"],
+  "reject_states": ["q_reject"],
+  "transitions": [
+    {"state": "q_even", "read": "0", "write": "0", "move": "R", "next": "q_even"},
+    {"state": "q_even", "read": "1", "write": "1", "move": "R", "next": "q_odd"},
+    {"state": "q_odd", "read": "0", "write": "0", "move": "R", "next": "q_odd"},
+    {"state": "q_odd", "read": "1", "write": "1", "move": "R", "next": "q_even"},
+    {"state": "q_even", "read": "_", "write": "_", "move": "S", "next": "q_accept"},
+    {"state": "q_odd", "read": "_", "write": "_", "move": "S", "next": "q_reject"}
+  ]
+}

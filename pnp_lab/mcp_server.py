@@ -13,6 +13,7 @@ from .experiments import run_growth_experiment, summarize_growth
 from .hard_search import search_hard_case
 from .research_db import ResearchDatabase
 from .switch_solver import RepresentationSwitchingSolver
+from .turing_machine import load_turing_machine
 from .workspace import safe_workspace_path
 
 
@@ -31,7 +32,7 @@ def build_server():
         """Вернуть научный статус и версию проекта."""
 
         return {
-            "version": "1.0.0",
+            "version": "1.1.0",
             "goal": "Воспроизводимые эксперименты с точными SAT-алгоритмами",
             "main_solver": RepresentationSwitchingSolver.name,
             "implemented_switch": "точное распознавание 3-CNF XOR -> GF(2)",
@@ -133,6 +134,23 @@ def build_server():
             "saved": str(output),
             "warning": "Это стресс-тест, а не математический контрпример P vs NP.",
         }
+
+    @mcp.tool()
+    def run_turing_machine(
+        machine_path: str,
+        input_text: str = "",
+        max_steps: int = 10_000,
+        trace: bool = False,
+    ) -> dict:
+        """Запустить JSON-машину Тьюринга внутри разрешённого workspace."""
+
+        path = safe_workspace_path(machine_path)
+        machine = load_turing_machine(path)
+        return machine.run(
+            input_text,
+            max_steps=max_steps,
+            trace=trace,
+        ).to_dict()
 
     @mcp.tool()
     def add_hypothesis(
