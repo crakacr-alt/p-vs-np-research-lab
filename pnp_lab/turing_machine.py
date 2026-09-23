@@ -94,6 +94,15 @@ class TuringMachine:
         if self.start_state not in self.states:
             raise ValueError("start_state отсутствует в states")
 
+        if any(len(symbol) != 1 for symbol in self.tape_alphabet):
+            raise ValueError("Каждый символ tape_alphabet должен иметь длину 1")
+
+        if any(len(symbol) != 1 for symbol in self.input_alphabet):
+            raise ValueError("Каждый символ input_alphabet должен иметь длину 1")
+
+        if len(self.blank) != 1:
+            raise ValueError("blank должен быть одним символом")
+
         if self.blank not in self.tape_alphabet:
             raise ValueError("blank должен входить в tape_alphabet")
 
@@ -153,6 +162,9 @@ class TuringMachine:
 
         if max_steps < 0:
             raise ValueError("max_steps не может быть отрицательным")
+
+        if trace_radius < 0:
+            raise ValueError("trace_radius не может быть отрицательным")
 
         unknown = set(input_text) - self.input_alphabet
 
