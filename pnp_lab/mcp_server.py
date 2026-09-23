@@ -6,6 +6,8 @@ MCP позволяет модели запускать только явно о�
 
 from dataclasses import asdict
 
+from . import __version__
+
 from .benchmark_runner import run_release_suite, save_benchmark
 from .cnf import load_dimacs, save_dimacs
 from .doctor import run_doctor
@@ -32,7 +34,7 @@ def build_server():
         """Вернуть научный статус и версию проекта."""
 
         return {
-            "version": "1.1.0",
+            "version": __version__,
             "goal": "Воспроизводимые эксперименты с точными SAT-алгоритмами",
             "main_solver": RepresentationSwitchingSolver.name,
             "implemented_switch": "точное распознавание 3-CNF XOR -> GF(2)",
