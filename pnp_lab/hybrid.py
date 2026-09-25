@@ -20,7 +20,7 @@ class HybridSolver:
     Ни один из этих шагов не является вероятностным угадыванием ответа.
     """
 
-    name = "hybrid-exact-v0.3"
+    name = "hybrid-exact-v0.2"
 
     def __init__(self):
         self.metrics = SolverMetrics()
