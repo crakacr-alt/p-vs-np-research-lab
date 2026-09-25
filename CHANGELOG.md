@@ -2,6 +2,25 @@
 
 Все заметные изменения проекта фиксируются здесь.
 
+## 1.1.2 — 2026-09-25
+
+### Research quality
+
+- добавлен CodeQL для Python;
+- добавлен Dependabot для Python dependencies и GitHub Actions;
+- добавлены CODEOWNERS, PR template и correctness bug template;
+- release checklist сделан универсальным для следующих версий;
+- добавлен автоматический GitHub Release workflow для wheel/sdist;
+- tag перед публикацией сверяется с package version;
+- package CI дополнительно запускает `pip check`;
+- CI переведён на актуальные official GitHub Actions;
+- исправлен артефакт форматирования в README.
+
+### Научный статус
+
+- solver-алгоритмы в 1.1.2 не менялись;
+- версия не заявляет нового результата по P vs NP.
+
 ## 1.1.1 — 2026-09-25
 
 ### Проверка корректности

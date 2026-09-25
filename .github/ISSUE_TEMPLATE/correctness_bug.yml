@@ -1,0 +1,29 @@
+name: Correctness bug
+description: Сообщить о возможном неверном SAT/UNSAT результате
+title: "[correctness] "
+labels: [bug]
+body:
+  - type: input
+    id: commit
+    attributes:
+      label: Версия или commit SHA
+    validations:
+      required: true
+  - type: textarea
+    id: instance
+    attributes:
+      label: Минимальный пример
+      description: DIMACS или способ сгенерировать пример без секретных данных.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Ожидаемый и фактический результат
+    validations:
+      required: true
+  - type: input
+    id: reference
+    attributes:
+      label: Чем сверяли
+      description: brute-force, PySAT или другой независимый oracle
