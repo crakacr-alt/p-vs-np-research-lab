@@ -86,5 +86,5 @@ jobs:
           pnp-lab doctor
       - uses: actions/upload-artifact@v7
         with:
-          name: p-vs-np-research-lab-1.1.2
+          name: p-vs-np-research-lab-1.1.3
           path: dist/*
