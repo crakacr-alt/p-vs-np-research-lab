@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "p-vs-np-research-lab"
-version = "1.1.0"
+version = "1.1.1"
 description = "Научная лаборатория для воспроизводимых SAT-экспериментов и точного representation switching."
 readme = "README.md"
 requires-python = ">=3.10"
