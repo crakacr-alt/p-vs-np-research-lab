@@ -3,6 +3,7 @@ from time import perf_counter
 from .canonical import canonical_formula
 from .cnf import CNFProblem, model_satisfies
 from .decomposition import split_into_independent_components
+from .heuristics import choose_jw_branch
 from .metrics import SolveResult, SolverMetrics
 from .xor import (
     canonical_xor,
@@ -27,7 +28,7 @@ class RepresentationSwitchingSolver:
     Важно: переход выполняется только при полном точном совпадении шаблона.
     """
 
-    name = "representation-switch-v1"
+    name = "representation-switch-v1.1"
 
     def __init__(self):
         self.metrics = SolverMetrics()
@@ -168,6 +169,7 @@ class RepresentationSwitchingSolver:
 
             if len(components) > 1:
                 self.metrics.decompositions += 1
+                self.metrics.components_solved += len(components)
                 combined_model = model.copy()
 
                 for component in components:
@@ -186,13 +188,13 @@ class RepresentationSwitchingSolver:
 
                 return combined_model
 
-        variable = self._choose_variable(
+        variable, preferred_value = choose_jw_branch(
             simplified,
-            reduced_xor,
+            [equation.variables for equation in reduced_xor],
         )
         self.metrics.decisions += 1
 
-        for value in (True, False):
+        for value in (preferred_value, not preferred_value):
             new_model = model.copy()
             new_model[variable] = value
 
@@ -271,16 +273,3 @@ class RepresentationSwitchingSolver:
 
         return None
 
-    def _choose_variable(self, clauses, equations):
-        counts = {}
-
-        for clause in clauses:
-            for literal in clause:
-                variable = abs(literal)
-                counts[variable] = counts.get(variable, 0) + 1
-
-        for equation in equations:
-            for variable in equation.variables:
-                counts[variable] = counts.get(variable, 0) + 1
-
-        return max(counts, key=counts.get)
