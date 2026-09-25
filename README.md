@@ -227,7 +227,8 @@ pnp-lab verify \
 - branching использует Jeroslow–Wang: литералы коротких клауз имеют больший вес;
 - solver сначала пробует полярность с большим score;
 - публичные solver IDs сохранены, чтобы не ломать benchmark/скрипты;
-- benchmark теперь пишет `components_solved`, `max_depth`, unit/pure counters;\n- property-based CI автоматически сверяет exact solver-ы с brute-force.
+- benchmark теперь пишет `components_solved`, `max_depth`, unit/pure counters;
+- property-based CI автоматически сверяет exact solver-ы с brute-force.
 
 Контрольный прогон на 60 фиксированных random 3-SAT
 (`28 variables / 118 clauses`) дал для Hybrid/Switch:

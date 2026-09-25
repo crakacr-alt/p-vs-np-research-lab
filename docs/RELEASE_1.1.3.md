@@ -13,7 +13,8 @@
 
 ## Проверка
 
-- unit tests на branching heuristic;\n- property-based test Hybrid/Switch vs brute-force;
+- unit tests на branching heuristic;
+- property-based test Hybrid/Switch vs brute-force;
 - дополнительные decomposition tests;
 - все существующие exact/XOR/brute-force tests;
 - сравнение SAT/UNSAT старой и новой реализации на одинаковых random inputs.
