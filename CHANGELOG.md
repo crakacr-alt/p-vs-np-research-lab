@@ -15,7 +15,7 @@
 
 ### Проверка
 
-- добавлены unit-тесты branching heuristic;
+- добавлены unit-тесты branching heuristic;\n- property-based CI постоянно сверяет Hybrid/Switch с brute-force на случайных маленьких CNF;
 - decomposition покрыт chain/high-occurrence случаями;
 - на 60 фиксированных random 3-SAT суммарные decisions снизились `727 -> 548`,
   calls `8006 -> 5529`;
