@@ -16,6 +16,9 @@
 
 Готово:
 
+- Jeroslow–Wang branching для Hybrid/Switch;
+- union-find decomposition независимых CNF-компонент;
+- расширенные метрики components/depth;
 - детерминированная одно-ленточная Turing Machine;
 - JSON transition format;
 - CLI/MCP запуск;
