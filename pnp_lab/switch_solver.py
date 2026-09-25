@@ -28,7 +28,7 @@ class RepresentationSwitchingSolver:
     Важно: переход выполняется только при полном точном совпадении шаблона.
     """
 
-    name = "representation-switch-v1.1"
+    name = "representation-switch-v1"
 
     def __init__(self):
         self.metrics = SolverMetrics()
