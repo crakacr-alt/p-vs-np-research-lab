@@ -322,6 +322,9 @@ C:\...\p-vs-np-research-lab\.venv\Scripts\python.exe
 - [Roadmap](ROADMAP.md)
 - [История изменений](CHANGELOG.md)
 - [Безопасность](SECURITY.md)
+- [Как внести вклад](CONTRIBUTING.md)
+- [Лицензия MIT](LICENSE)
+- `CITATION.cff` для цитирования конкретной версии проекта
 - [Release notes 1.0](docs/RELEASE_1.0.0.md)
 - [Release notes 1.1](docs/RELEASE_1.1.0.md)
 
@@ -333,11 +336,12 @@ pnp-lab doctor
 pnp-lab benchmark --output results/release-check
 ```
 
-Для проверки кода:
+Для полной проверки кода, включая property-based tests:
 
 ```bash
 pip install -e ".[dev]"
-ruff check pnp_lab tests
+python -m unittest discover -s property_tests -v
+ruff check pnp_lab tests property_tests
 ```
 
 ## Как трактовать результаты
