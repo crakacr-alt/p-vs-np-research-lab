@@ -1,49 +1,59 @@
 def split_into_independent_components(clauses: list[list[int]]) -> list[list[list[int]]]:
     """Делит CNF на независимые компоненты по общим переменным.
 
-    Если две группы клауз не имеют общих переменных, их можно решать отдельно:
+    Используется union-find: для каждой переменной достаточно связать текущую
+    клаузу с первой клаузой, где эта переменная уже встречалась. Это избегает
+    повторных проходов по длинным спискам соседей.
 
-        F = F1 И F2
+    Преобразование точное:
 
-    где переменные F1 и F2 не пересекаются.
+        F = F1 И F2 И ...
 
-    Это точное преобразование: SAT(F) тогда и только тогда,
-    когда SAT(F1) и SAT(F2).
+    Если компоненты не делят переменные, их можно решать отдельно.
     """
 
     if len(clauses) <= 1:
         return [clauses]
 
-    variable_to_clauses: dict[int, list[int]] = {}
+    parent = list(range(len(clauses)))
+    rank = [0] * len(clauses)
+
+    def find(index):
+        while parent[index] != index:
+            parent[index] = parent[parent[index]]
+            index = parent[index]
+        return index
+
+    def union(first, second):
+        root_first = find(first)
+        root_second = find(second)
+
+        if root_first == root_second:
+            return
+
+        if rank[root_first] < rank[root_second]:
+            root_first, root_second = root_second, root_first
+
+        parent[root_second] = root_first
+
+        if rank[root_first] == rank[root_second]:
+            rank[root_first] += 1
+
+    first_clause_for_variable: dict[int, int] = {}
 
     for clause_index, clause in enumerate(clauses):
         for literal in clause:
             variable = abs(literal)
-            variable_to_clauses.setdefault(variable, []).append(clause_index)
 
-    visited = set()
-    components = []
+            if variable in first_clause_for_variable:
+                union(clause_index, first_clause_for_variable[variable])
+            else:
+                first_clause_for_variable[variable] = clause_index
 
-    for start in range(len(clauses)):
-        if start in visited:
-            continue
+    grouped: dict[int, list[list[int]]] = {}
 
-        stack = [start]
-        visited.add(start)
-        component_indexes = []
+    for clause_index, clause in enumerate(clauses):
+        root = find(clause_index)
+        grouped.setdefault(root, []).append(clause)
 
-        while stack:
-            clause_index = stack.pop()
-            component_indexes.append(clause_index)
-
-            for literal in clauses[clause_index]:
-                variable = abs(literal)
-
-                for neighbour in variable_to_clauses.get(variable, []):
-                    if neighbour not in visited:
-                        visited.add(neighbour)
-                        stack.append(neighbour)
-
-        components.append([clauses[index] for index in component_indexes])
-
-    return components
+    return list(grouped.values())
