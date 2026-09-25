@@ -15,6 +15,7 @@ class SolverMetrics:
     pure_literal_assignments: int = 0
     cache_hits: int = 0
     decompositions: int = 0
+    components_solved: int = 0
     max_depth: int = 0
     xor_equations_detected: int = 0
     xor_propagations: int = 0
