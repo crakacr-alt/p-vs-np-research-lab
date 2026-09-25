@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from itertools import product
 
+from .certificates import XORTransformationCertificate, verify_xor_certificate
 from .cnf import CNFProblem
 
 
@@ -19,31 +20,18 @@ class XOREquation:
 def _forbidden_assignment(clause: tuple[int, ...], variables: tuple[int, ...]):
     """Возвращает единственное присваивание, на котором клауза ложна."""
 
-    literal_by_variable = {
-        abs(literal): literal
-        for literal in clause
-    }
-
+    literal_by_variable = {abs(literal): literal for literal in clause}
     assignment = []
 
     for variable in variables:
         literal = literal_by_variable[variable]
-
-        # x ложно при x=0, а НЕ x ложно при x=1.
         assignment.append(0 if literal > 0 else 1)
 
     return tuple(assignment)
 
 
-def detect_xor3(problem: CNFProblem):
-    """Распознаёт точные 3-variable XOR-блоки в CNF.
-
-    XOR из трёх переменных кодируется четырьмя 3-CNF клаузами.
-    Мы преобразуем блок только если совпадение полное и однозначное.
-
-    Возвращает:
-        remaining_problem, equations
-    """
+def detect_xor3_with_certificates(problem: CNFProblem):
+    """Распознаёт XOR3-блоки и возвращает независимо проверяемые сертификаты."""
 
     groups: dict[tuple[int, ...], list[tuple[int, tuple[int, ...]]]] = {}
 
@@ -52,7 +40,6 @@ def detect_xor3(problem: CNFProblem):
             continue
 
         variables = tuple(sorted(abs(literal) for literal in clause))
-
         if len(set(variables)) != 3:
             continue
 
@@ -60,59 +47,56 @@ def detect_xor3(problem: CNFProblem):
 
     used_indexes = set()
     equations = []
+    certificates = []
 
     for variables, items in groups.items():
         if len(items) != 4:
             continue
 
-        forbidden = {
-            _forbidden_assignment(clause, variables)
-            for _, clause in items
-        }
-
+        forbidden = {_forbidden_assignment(clause, variables) for _, clause in items}
         if len(forbidden) != 4:
             continue
 
-        parities = {
-            sum(bits) % 2
-            for bits in forbidden
-        }
-
+        parities = {sum(bits) % 2 for bits in forbidden}
         if len(parities) != 1:
             continue
 
         forbidden_parity = next(iter(parities))
         allowed_rhs = bool(1 - forbidden_parity)
+        source_clauses = tuple(clause for _, clause in items)
 
-        equations.append(
-            XOREquation(
-                variables=variables,
-                rhs=allowed_rhs,
-            )
+        certificate = XORTransformationCertificate(
+            variables=variables,
+            rhs=allowed_rhs,
+            source_clauses=source_clauses,
         )
+        if not verify_xor_certificate(certificate):
+            raise RuntimeError("внутренняя ошибка: XOR transformation certificate rejected")
 
+        equations.append(XOREquation(variables=variables, rhs=allowed_rhs))
+        certificates.append(certificate)
         used_indexes.update(index for index, _ in items)
 
     remaining = tuple(
-        clause
-        for index, clause in enumerate(problem.clauses)
-        if index not in used_indexes
+        clause for index, clause in enumerate(problem.clauses) if index not in used_indexes
     )
 
     return (
-        CNFProblem(
-            variables=problem.variables,
-            clauses=remaining,
-        ),
+        CNFProblem(variables=problem.variables, clauses=remaining),
         tuple(equations),
+        tuple(certificates),
     )
 
 
-def xor3_to_cnf(equation: XOREquation):
-    """Кодирует 3-variable XOR обратно в четыре CNF-клаузы.
+def detect_xor3(problem: CNFProblem):
+    """Совместимый API: возвращает remaining_problem и equations."""
 
-    Функция нужна для benchmark-генераторов и тестов эквивалентности.
-    """
+    remaining, equations, _ = detect_xor3_with_certificates(problem)
+    return remaining, equations
+
+
+def xor3_to_cnf(equation: XOREquation):
+    """Кодирует 3-variable XOR обратно в четыре CNF-клаузы."""
 
     if len(equation.variables) != 3:
         raise ValueError("xor3_to_cnf поддерживает ровно три переменные")
@@ -121,16 +105,12 @@ def xor3_to_cnf(equation: XOREquation):
 
     for assignment in product([0, 1], repeat=3):
         parity = sum(assignment) % 2
-
         if parity == int(equation.rhs):
             continue
 
         clause = []
-
         for variable, value in zip(equation.variables, assignment):
-            # Делаем клаузу ложной ровно на этом запрещённом присваивании.
             clause.append(variable if value == 0 else -variable)
-
         clauses.append(tuple(clause))
 
     return tuple(clauses)
@@ -140,11 +120,7 @@ def reduce_xor_system(
     equations: tuple[XOREquation, ...] | list[XOREquation],
     model: dict[int, bool],
 ):
-    """Подставляет model и выполняет Gaussian elimination над GF(2).
-
-    Возвращает:
-        (reduced_equations, contradiction)
-    """
+    """Подставляет model и выполняет Gaussian elimination над GF(2)."""
 
     rows = []
 
@@ -183,7 +159,6 @@ def reduce_xor_system(
         if not variables and rhs:
             return (), True
 
-    # Backward elimination делает результат стабильнее и чаще создаёт unit equations.
     pivot_ids = sorted(pivots, reverse=True)
 
     for pivot in pivot_ids:
@@ -235,11 +210,7 @@ def solve_xor_system(
     equations: tuple[XOREquation, ...],
     model: dict[int, bool],
 ):
-    """Достраивает model до решения XOR-системы.
-
-    Свободные переменные ставятся в False. После Gaussian elimination это
-    даёт одно из возможных решений системы.
-    """
+    """Достраивает model до решения XOR-системы."""
 
     reduced, contradiction = reduce_xor_system(equations, model)
 
@@ -248,17 +219,8 @@ def solve_xor_system(
 
     result = model.copy()
 
-    pivot_variables = {
-        equation.variables[0]
-        for equation in reduced
-    }
-
-    all_variables = {
-        variable
-        for equation in reduced
-        for variable in equation.variables
-    }
-
+    pivot_variables = {equation.variables[0] for equation in reduced}
+    all_variables = {variable for equation in reduced for variable in equation.variables}
     free_variables = all_variables - pivot_variables
 
     for variable in free_variables:
