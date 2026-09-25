@@ -24,6 +24,10 @@ class BenchmarkResult:
     calls: int
     cache_hits: int
     decompositions: int
+    components_solved: int
+    unit_propagations: int
+    pure_literal_assignments: int
+    max_depth: int
     xor_equations_detected: int
     xor_propagations: int
     xor_direct_solves: int
@@ -79,6 +83,10 @@ def run_benchmark_cases(
                     calls=metrics.calls,
                     cache_hits=metrics.cache_hits,
                     decompositions=metrics.decompositions,
+                    components_solved=metrics.components_solved,
+                    unit_propagations=metrics.unit_propagations,
+                    pure_literal_assignments=metrics.pure_literal_assignments,
+                    max_depth=metrics.max_depth,
                     xor_equations_detected=metrics.xor_equations_detected,
                     xor_propagations=metrics.xor_propagations,
                     xor_direct_solves=metrics.xor_direct_solves,
@@ -113,8 +121,8 @@ def build_markdown_report(results: list[BenchmarkResult]):
         "",
         "> Это экспериментальные измерения, а не доказательство асимптотики.",
         "",
-        "| Case | Family | Solver | SAT | Decisions | Calls | XOR eq | Switches | Seconds |",
-        "|---|---|---|---:|---:|---:|---:|---:|---:|",
+        "| Case | Family | Solver | SAT | Decisions | Calls | Components | Depth | XOR eq | Switches | Seconds |",
+        "|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
 
     for row in results:
@@ -128,6 +136,8 @@ def build_markdown_report(results: list[BenchmarkResult]):
                     str(row.sat),
                     str(row.decisions),
                     str(row.calls),
+                    str(row.components_solved),
+                    str(row.max_depth),
                     str(row.xor_equations_detected),
                     str(row.representation_switches),
                     f"{row.seconds:.6f}",
