@@ -8,7 +8,7 @@
 воспроизводимых экспериментов с SAT, точными алгоритмами, трудными экземплярами
 и переключением математических представлений.
 
-> **Релиз:** 1.1.2  
+> **Релиз:** 1.1.3  
 > **Научный статус:** проект не является доказательством `P = NP` или `P != NP`.
 
 ## Что эта схема даёт на практике уже сейчас
@@ -57,9 +57,9 @@ SAT / UNSAT
 ### Exact solvers
 
 - `DPLLSolver` — простой baseline;
-- `HybridSolver` — DPLL + propagation + decomposition + memoization;
+- `HybridSolver` — DPLL + propagation + union-find decomposition + memoization + Jeroslow–Wang branching;
 - `RepresentationSwitchingSolver` — Hybrid-подход с точным переходом
-  `CNF -> XOR -> GF(2)`.
+  `CNF -> XOR -> GF(2)` и тем же взвешенным branching для оставшейся CNF.
 
 ### Проверка корректности
 
@@ -219,6 +219,27 @@ pnp-lab verify \
   --reference
 ```
 
+## Эффективность поиска в 1.1.3
+
+Внутренний порядок поиска улучшен без изменения точности:
+
+- decomposition использует union-find вместо повторного обхода списков соседей;
+- branching использует Jeroslow–Wang: литералы коротких клауз имеют больший вес;
+- solver сначала пробует полярность с большим score;
+- публичные solver IDs сохранены, чтобы не ломать benchmark/скрипты;
+- benchmark теперь пишет `components_solved`, `max_depth`, unit/pure counters;\n- property-based CI автоматически сверяет exact solver-ы с brute-force.
+
+Контрольный прогон на 60 фиксированных random 3-SAT
+(`28 variables / 118 clauses`) дал для Hybrid/Switch:
+
+- decisions: `727 -> 548`;
+- recursive calls: `8006 -> 5529`;
+- по decisions: 45 случаев лучше, 9 хуже, 6 без изменения.
+
+Это измерение конкретного набора, **не универсальная гарантия ускорения**.
+
+Подробнее: [эвристика поиска](docs/SOLVER_HEURISTICS.md).
+
 ## Подключение к Vanya AI / другой модели через MCP
 
 Установить MCP-дополнение:
@@ -333,6 +354,8 @@ C:\...\p-vs-np-research-lab\.venv\Scripts\python.exe
 - [Release notes 1.1](docs/RELEASE_1.1.0.md)
 - [Release notes 1.1.1](docs/RELEASE_1.1.1.md)
 - [Release notes 1.1.2](docs/RELEASE_1.1.2.md)
+- [Release notes 1.1.3](docs/RELEASE_1.1.3.md)
+- [Solver heuristics](docs/SOLVER_HEURISTICS.md)
 - [Release process](docs/RELEASE_PROCESS.md)
 
 ## Проверка
