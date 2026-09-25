@@ -1,10 +1,14 @@
 # P vs NP Research Lab
 
+[![tests](https://github.com/crakacr-alt/p-vs-np-research-lab/actions/workflows/tests.yml/badge.svg)](https://github.com/crakacr-alt/p-vs-np-research-lab/actions/workflows/tests.yml)
+[![CodeQL](https://github.com/crakacr-alt/p-vs-np-research-lab/actions/workflows/codeql.yml/badge.svg)](https://github.com/crakacr-alt/p-vs-np-research-lab/actions/workflows/codeql.yml)
+
+
 **P vs NP Research Lab** — открытая научно-исследовательская лаборатория для
 воспроизводимых экспериментов с SAT, точными алгоритмами, трудными экземплярами
 и переключением математических представлений.
 
-> **Релиз:** 1.1.1  
+> **Релиз:** 1.1.2  
 > **Научный статус:** проект не является доказательством `P = NP` или `P != NP`.
 
 ## Что эта схема даёт на практике уже сейчас
@@ -326,7 +330,10 @@ C:\...\p-vs-np-research-lab\.venv\Scripts\python.exe
 - [Лицензия MIT](LICENSE)
 - `CITATION.cff` для цитирования конкретной версии проекта
 - [Release notes 1.0](docs/RELEASE_1.0.0.md)
-- [Release notes 1.1](docs/RELEASE_1.1.0.md)\n- [Release notes 1.1.1](docs/RELEASE_1.1.1.md)
+- [Release notes 1.1](docs/RELEASE_1.1.0.md)
+- [Release notes 1.1.1](docs/RELEASE_1.1.1.md)
+- [Release notes 1.1.2](docs/RELEASE_1.1.2.md)
+- [Release process](docs/RELEASE_PROCESS.md)
 
 ## Проверка
 
