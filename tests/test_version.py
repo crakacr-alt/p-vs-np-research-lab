@@ -14,8 +14,10 @@ class TestPackageVersion(unittest.TestCase):
                 "to verify package metadata"
             )
 
+        # Версия в pyproject и версия, которую показывает сам модуль, должны
+        # совпадать. Конкретное число здесь не фиксируем, иначе каждый релиз
+        # требует менять один и тот же номер ещё и в тесте.
         self.assertEqual(installed, pnp_lab.__version__)
-        self.assertEqual(installed, "1.1.0")
 
 
 if __name__ == "__main__":
