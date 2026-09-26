@@ -1,4 +1,5 @@
 import io
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -155,6 +156,29 @@ print(result["sat"])
             runtime = LabRuntime(output=output)
             runtime.execute_file(main)
             self.assertEqual(output.getvalue(), "21\n")
+
+    def test_environment_module_path_can_be_disabled(self):
+        with tempfile.TemporaryDirectory() as allowed_dir, tempfile.TemporaryDirectory() as external_dir:
+            external = Path(external_dir)
+            (external / "helper.lab").write_text(
+                'LangRule="-ENG"\nlet value = 42\n',
+                encoding="utf-8",
+            )
+            old_value = os.environ.get("LABSCRIPT_PATH")
+            os.environ["LABSCRIPT_PATH"] = external_dir
+
+            try:
+                runtime = LabRuntime(
+                    module_paths=[allowed_dir],
+                    use_env_module_path=False,
+                )
+                with self.assertRaisesRegex(LabScriptError, "module not found"):
+                    runtime.execute('LangRule="-ENG"\nimport helper\n')
+            finally:
+                if old_value is None:
+                    os.environ.pop("LABSCRIPT_PATH", None)
+                else:
+                    os.environ["LABSCRIPT_PATH"] = old_value
 
     def test_explicit_host_module_embedding(self):
         output = io.StringIO()
