@@ -4,6 +4,9 @@ import io
 import sys
 from pathlib import Path
 
+from .. import __version__ as PROJECT_VERSION
+from . import LABSCRIPT_VERSION
+
 from .language import detect_language
 from .markdown import build_markdown_report
 from .package import build_package, run_package, verify_package
@@ -125,6 +128,27 @@ def new_command(args):
     print(f"created: {path}")
 
 
+def version_command(args):
+    print(f"LabScript {LABSCRIPT_VERSION} / Research Lab {PROJECT_VERSION}")
+
+
+def doctor_command(args):
+    checks = [
+        ('LangRule="-ENG"\nprint(40 + 2)\n', "42\n"),
+        ('Язык="-РУС"\nпечать(40 + 2)\n', "42\n"),
+    ]
+
+    for source, expected in checks:
+        output = io.StringIO()
+        runtime = LabRuntime(output=output)
+        runtime.execute(source, filename="<doctor>")
+        if output.getvalue() != expected:
+            raise LabScriptError("runtime self-test failed")
+
+    print(f"LabScript {LABSCRIPT_VERSION}: runtime OK")
+    print(f"Research Lab {PROJECT_VERSION}: integration OK")
+
+
 def info_command(args):
     source = Path(args.file).read_text(encoding="utf-8")
     language, _ = detect_language(source)
@@ -138,6 +162,12 @@ def build_parser():
         description="LabScript — bilingual language for P vs NP Research Lab",
     )
     commands = parser.add_subparsers(dest="command", required=True)
+
+    version_parser = commands.add_parser("version", help="show language/runtime version")
+    version_parser.set_defaults(handler=version_command)
+
+    doctor_parser = commands.add_parser("doctor", help="run bilingual runtime self-test")
+    doctor_parser.set_defaults(handler=doctor_command)
 
     run_parser = commands.add_parser("run", help="run .lab or .labpkg")
     run_parser.add_argument("file")
