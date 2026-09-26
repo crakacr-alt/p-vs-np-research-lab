@@ -207,6 +207,7 @@ class LabRuntime:
         output=None,
         max_steps=1_000_000,
         module_paths=None,
+        modules=None,
         trace=None,
     ):
         self.output = output if output is not None else io.StringIO()
@@ -215,9 +216,12 @@ class LabRuntime:
         self.trace = trace
         self.module_paths = [Path(path).resolve() for path in (module_paths or [])]
         self.module_cache = {}
+        self.modules = dict(BUILTIN_MODULES)
+        if modules:
+            self.modules.update(modules)
         self.globals = Environment()
         self.globals.values.update(default_builtins(self.output))
-        self.globals.values.update(BUILTIN_MODULES)
+        self.globals.values.update(self.modules)
 
     def execute(self, source: str, *, filename="<labscript>", env=None):
         _, _, tree = parse_source(source, filename)
@@ -488,8 +492,8 @@ class LabRuntime:
         raise LabScriptError("assignment target must be a variable or index")
 
     def _load_module(self, name):
-        if name in BUILTIN_MODULES:
-            return BUILTIN_MODULES[name]
+        if name in self.modules:
+            return self.modules[name]
 
         if name in self.module_cache:
             return self.module_cache[name]
@@ -510,7 +514,7 @@ class LabRuntime:
 
             module_env = Environment()
             module_env.values.update(default_builtins(self.output))
-            module_env.values.update(BUILTIN_MODULES)
+            module_env.values.update(self.modules)
 
             source = candidate.read_text(encoding="utf-8")
             old_paths = list(self.module_paths)
@@ -522,7 +526,7 @@ class LabRuntime:
             finally:
                 self.module_paths = old_paths
 
-            builtin_names = set(default_builtins(self.output)) | set(BUILTIN_MODULES)
+            builtin_names = set(default_builtins(self.output)) | set(self.modules)
             public = {
                 key: value
                 for key, value in module_env.values.items()
@@ -539,8 +543,14 @@ class LabRuntime:
         return bool(value)
 
 
-def run_source(source: str, *, filename="<labscript>", max_steps=1_000_000):
+def run_source(
+    source: str,
+    *,
+    filename="<labscript>",
+    max_steps=1_000_000,
+    modules=None,
+):
     output = io.StringIO()
-    runtime = LabRuntime(output=output, max_steps=max_steps)
+    runtime = LabRuntime(output=output, max_steps=max_steps, modules=modules)
     runtime.execute(source, filename=filename)
     return output.getvalue(), runtime.globals.values
