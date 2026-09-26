@@ -5,6 +5,7 @@ from pathlib import Path
 
 from pnp_lab.labscript.language import Language, detect_language, translate_source
 from pnp_lab.labscript.runtime import LabRuntime, LabScriptError, StepLimitError
+from pnp_lab.labscript.stdlib import ModuleNamespace
 
 
 class LabScriptLanguageTests(unittest.TestCase):
@@ -128,6 +129,18 @@ print(result["sat"])
             runtime = LabRuntime(output=output)
             runtime.execute_file(main)
             self.assertEqual(output.getvalue(), "21\n")
+
+    def test_explicit_host_module_embedding(self):
+        output = io.StringIO()
+        company = ModuleNamespace(
+            "company",
+            {"price_with_tax": lambda value: round(value * 1.2, 2)},
+        )
+        runtime = LabRuntime(output=output, modules={"company": company})
+        runtime.execute(
+            'LangRule="-ENG"\nimport company\nprint(company.price_with_tax(100))\n'
+        )
+        self.assertEqual(output.getvalue(), "120.0\n")
 
     def test_python_object_attributes_are_blocked(self):
         with self.assertRaises(LabScriptError):
