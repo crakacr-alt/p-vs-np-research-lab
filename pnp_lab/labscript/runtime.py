@@ -21,7 +21,7 @@ class LabScriptRuntimeError(LabScriptError):
     pass
 
 
-class StepLimitError(LabScriptError):
+class StepLimitError(LabScriptRuntimeError):
     pass
 
 
@@ -268,7 +268,9 @@ class LabRuntime:
     def _tick(self, node, env):
         self.steps += 1
         if self.steps > self.max_steps:
+            line = getattr(node, "lineno", "?")
             raise StepLimitError(
+                f"{self.current_filename}:{line}: "
                 f"step limit {self.max_steps} exceeded; possible infinite loop"
             )
 
