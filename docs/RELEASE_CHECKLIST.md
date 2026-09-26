@@ -4,33 +4,46 @@
 
 ## Версия и документы
 
-- [ ] номер версии обновлён в `pyproject.toml`;
-- [ ] `pnp_lab.__version__` совпадает с package metadata;
+- [ ] номер версии обновлён в pyproject.toml;
+- [ ] pnp_lab.__version__ совпадает с package metadata;
 - [ ] README показывает текущую версию;
-- [ ] `CITATION.cff` обновлён;
-- [ ] `CHANGELOG.md` содержит отдельную запись;
-- [ ] есть `docs/RELEASE_<version>.md`.
+- [ ] CITATION.cff обновлён;
+- [ ] CHANGELOG.md содержит отдельную запись;
+- [ ] есть docs/RELEASE_<version>.md.
 
 ## Корректность
 
-- [ ] `python -m unittest discover -s tests -v`;
-- [ ] `python -m unittest discover -s property_tests -v`;
-- [ ] `pnp-lab doctor`;
+- [ ] python -m unittest discover -s tests -v;
+- [ ] python -m unittest discover -s property_tests -v;
+- [ ] pnp-lab doctor;
 - [ ] differential verification проходит;
-- [ ] для изменения solver/representation есть отдельный correctness test;
+- [ ] solver/representation change имеет correctness test;
 - [ ] сильное научное утверждение не основано только на benchmark.
 
-## Упаковка
+## LabScript, если язык менялся
 
-- [ ] `python -m build`;
-- [ ] `python -m twine check dist/*`;
+- [ ] русский и английский examples проходят;
+- [ ] labscript check проходит;
+- [ ] labscript doctor проходит;
+- [ ] .labpkg build/verify/run проходит;
+- [ ] одинаковые исходники дают одинаковый package hash;
+- [ ] malformed/path-traversal package test проходит;
+- [ ] Jupyter integration job зелёный;
+- [ ] Windows/Linux/macOS platform job зелёный;
+- [ ] LABSCRIPT_RU.md и LABSCRIPT_EN.md обновлены;
+- [ ] старые .lab программы не ломаются без явно задокументированного major change.
+
+## Упаковка Python
+
+- [ ] python -m build;
+- [ ] python -m twine check dist/*;
 - [ ] wheel ставится в чистое окружение;
-- [ ] `python -m pip check` проходит.
+- [ ] python -m pip check проходит.
 
 ## GitHub
 
 - [ ] PR зелёный;
 - [ ] CodeQL зелёный;
-- [ ] PR слит в `main`;
+- [ ] PR слит в main;
 - [ ] зелёный post-merge CI;
-- [ ] только после этого создан tag `vX.Y.Z`.
+- [ ] только после этого создан tag vX.Y.Z.
