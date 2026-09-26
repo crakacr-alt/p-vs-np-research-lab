@@ -49,3 +49,37 @@ pnp-lab doctor
 pnp-lab benchmark --output results/pre-pr
 ruff check pnp_lab tests
 ```
+
+
+## Изменения LabScript
+
+Язык — публичный интерфейс. Изменение parser/runtime нельзя делать только ради
+одного красивого примера.
+
+Для нового синтаксиса или builtin:
+
+1. показать одинаковое поведение RU/EN, если конструкция языковая;
+2. добавить unit test;
+3. проверить строки/комментарии, чтобы translator их не менял;
+4. не открывать arbitrary Python import/attribute access;
+5. не ломать старые .lab examples;
+6. обновить LABSCRIPT_RU.md и LABSCRIPT_EN.md;
+7. заметное изменение записать в CHANGELOG.
+
+Для package format дополнительно нужны reproducibility и malformed-package tests.
+
+Для host-модуля нужно явно описать, какие capabilities он открывает программе.
+
+## Новая научная engine-интеграция
+
+Lean/SMT/symbolic/PDE backend должен подключаться через явную engine/host-module
+границу, а не импортироваться из parser/runtime.
+
+Нужно указать:
+
+- тип задач;
+- формат входа/выхода;
+- уровень доверия результата;
+- independent verifier/certificate, если он существует;
+- optional dependency;
+- reproducible test/benchmark.
