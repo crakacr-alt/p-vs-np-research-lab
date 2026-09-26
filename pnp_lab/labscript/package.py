@@ -115,6 +115,11 @@ def verify_package(path):
             raise ValueError(
                 f"unsupported LabScript package format: {manifest.get('format')}"
             )
+        if manifest.get("labscript_version") != LABSCRIPT_VERSION:
+            raise ValueError(
+                "unsupported LabScript language version: "
+                f"{manifest.get('labscript_version')}"
+            )
 
         files = manifest.get("files", {})
         main = manifest.get("main")
