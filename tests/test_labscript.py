@@ -164,6 +164,14 @@ print(a + b)
         with self.assertRaisesRegex(LabScriptError, "return used outside"):
             self.run_program('LangRule="-ENG"\nreturn 1\n')
 
+    def test_runtime_error_contains_source_line(self):
+        runtime = LabRuntime()
+        with self.assertRaisesRegex(LabScriptError, r"demo\.lab:2: division by zero"):
+            runtime.execute(
+                'LangRule="-ENG"\nprint(1 / 0)\n',
+                filename="demo.lab",
+            )
+
     def test_python_object_attributes_are_blocked(self):
         with self.assertRaises(LabScriptError):
             self.run_program('LangRule="-ENG"\nprint((1).__class__)\n')
