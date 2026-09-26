@@ -4,6 +4,7 @@ from .benchmarks import xor_inconsistent_core
 from .cnf import CNFProblem, model_satisfies
 from .dpll import DPLLSolver
 from .hybrid import HybridSolver
+from .labscript.runtime import run_source
 from .switch_solver import RepresentationSwitchingSolver
 from .turing_machine import Transition, TuringMachine
 
@@ -79,5 +80,13 @@ def run_doctor():
         return DoctorResult(False, checks + ["Turing Machine self-test failed"])
 
     checks.append("deterministic Turing Machine: OK")
+
+    lab_output, _ = run_source(
+        'Язык="-РУС"\nфункция двойное(x):\n    вернуть x * 2\nпечать(двойное(21))\n'
+    )
+    if lab_output != "42\n":
+        return DoctorResult(False, checks + ["LabScript bilingual runtime failed"])
+
+    checks.append("LabScript RUS/ENG runtime: OK")
 
     return DoctorResult(True, checks)
