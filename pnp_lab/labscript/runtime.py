@@ -212,6 +212,7 @@ class LabRuntime:
         max_steps=1_000_000,
         module_paths=None,
         modules=None,
+        use_env_module_path=True,
         trace=None,
     ):
         self.output = output if output is not None else io.StringIO()
@@ -220,6 +221,7 @@ class LabRuntime:
         self.trace = trace
         self.module_paths = [Path(path).resolve() for path in (module_paths or [])]
         self.module_cache = {}
+        self.use_env_module_path = bool(use_env_module_path)
         self.current_filename = "<labscript>"
         self.modules = dict(BUILTIN_MODULES)
         if modules:
@@ -537,10 +539,11 @@ class LabRuntime:
             raise LabScriptError(f"invalid module name: {name!r}")
 
         search_paths = list(self.module_paths)
-        env_path = os.environ.get("LABSCRIPT_PATH", "")
-        for item in env_path.split(os.pathsep):
-            if item:
-                search_paths.append(Path(item).resolve())
+        if self.use_env_module_path:
+            env_path = os.environ.get("LABSCRIPT_PATH", "")
+            for item in env_path.split(os.pathsep):
+                if item:
+                    search_paths.append(Path(item).resolve())
 
         for directory in search_paths:
             candidate = directory / f"{name}.lab"
