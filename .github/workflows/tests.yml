@@ -82,6 +82,7 @@ jobs:
       - run: labscript build examples/labscript_english.lab
       - run: labscript verify examples/labscript_english.labpkg
       - run: labscript run examples/labscript_english.labpkg
+
   jupyter-check:
     runs-on: ubuntu-latest
     steps:
@@ -91,7 +92,18 @@ jobs:
           python-version: "3.12"
       - run: python -m pip install -e ".[jupyter]"
       - run: |
-          ipython --quick --no-banner -c "get_ipython().run_line_magic('load_ext', 'pnp_lab.labscript.jupyter'); get_ipython().run_cell_magic('lab', '', 'Язык=\"-РУС\"\\nпечать(40 + 2)')" 
+          python - <<'PY'
+          from IPython.core.interactiveshell import InteractiveShell
+
+          shell = InteractiveShell.instance()
+          shell.run_line_magic("load_ext", "pnp_lab.labscript.jupyter")
+          shell.run_cell_magic(
+              "lab",
+              "",
+              'Язык="-РУС"\nпечать(40 + 2)',
+          )
+          print("Jupyter LabScript OK")
+          PY
 
   style:
     runs-on: ubuntu-latest
