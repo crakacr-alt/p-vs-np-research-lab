@@ -5,6 +5,7 @@ import tempfile
 import zipfile
 from pathlib import Path
 
+from . import LABSCRIPT_VERSION
 from .language import detect_language
 from .runtime import parse_source
 from .stdlib import BUILTIN_MODULES
@@ -58,6 +59,15 @@ def _collect_sources(main_file):
     return [found[name] for name in sorted(found)]
 
 
+
+def _write_deterministic(archive, name, payload):
+    info = zipfile.ZipInfo(name)
+    info.date_time = (1980, 1, 1, 0, 0, 0)
+    info.compress_type = zipfile.ZIP_DEFLATED
+    info.external_attr = 0o644 << 16
+    archive.writestr(info, payload)
+
+
 def build_package(main_file, output_file=None):
     main_file = Path(main_file).resolve()
 
@@ -71,19 +81,20 @@ def build_package(main_file, output_file=None):
 
     manifest = {
         "format": PACKAGE_FORMAT,
+        "labscript_version": LABSCRIPT_VERSION,
         "main": main_file.name,
         "language": language.value,
         "files": {path.name: file_sha256(path) for path in sources},
     }
 
     output_file.parent.mkdir(parents=True, exist_ok=True)
-    with zipfile.ZipFile(output_file, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-        archive.writestr(
-            "manifest.json",
-            json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
-        )
+    with zipfile.ZipFile(output_file, "w") as archive:
+        manifest_bytes = (
+            json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\n"
+        ).encode("utf-8")
+        _write_deterministic(archive, "manifest.json", manifest_bytes)
         for path in sources:
-            archive.write(path, arcname=f"src/{path.name}")
+            _write_deterministic(archive, f"src/{path.name}", path.read_bytes())
 
     return output_file, manifest
 
