@@ -219,7 +219,7 @@ def hypothesis_status_command(args):
 
 def build_parser():
     parser = argparse.ArgumentParser(
-        description="P vs NP Research Lab — воспроизводимые SAT-эксперименты"
+        description="P vs NP Research Lab — проверяемая вычислительная лаборатория"
     )
     commands = parser.add_subparsers(dest="command", required=True)
 
