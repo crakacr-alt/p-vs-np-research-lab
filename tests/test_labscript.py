@@ -65,6 +65,32 @@ print(total)
         output, _ = self.run_program(source)
         self.assertEqual(output, "если иначе функция\n")
 
+    def test_language_autodetect_ignores_russian_words_inside_string(self):
+        source = 'print("если иначе функция")\n'
+        language, translated = translate_source(source)
+        self.assertEqual(language, Language.ENG)
+        self.assertIn('"если иначе функция"', translated)
+
+    def test_phrase_translation_does_not_touch_string(self):
+        source = '''Язык="-РУС"
+печать("иначе если пусть x = 1")
+'''
+        output, _ = self.run_program(source)
+        self.assertEqual(output, "иначе если пусть x = 1\n")
+
+    def test_english_else_if_phrase(self):
+        source = '''LangRule="-ENG"
+let x = 2
+if x == 1:
+    print("one")
+else if x == 2:
+    print("two")
+else:
+    print("other")
+'''
+        output, _ = self.run_program(source)
+        self.assertEqual(output, "two\n")
+
     def test_function_assignment_is_local(self):
         source = '''LangRule="-ENG"
 let x = 10
