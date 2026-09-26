@@ -98,9 +98,16 @@ def detect_language(source: str) -> tuple[Language, str]:
         lines[first_content] = ""
         return language, "\n".join(lines)
 
-    lowered = source.lower()
-    if any(re.search(rf"\b{re.escape(word)}\b", lowered) for word in _RUS_KEYWORDS):
-        return Language.RUS, source
+    try:
+        tokens = tokenize.generate_tokens(io.StringIO(source).readline)
+        for token in tokens:
+            if (
+                token.type == tokenize.NAME
+                and token.string.lower() in _RUS_KEYWORDS
+            ):
+                return Language.RUS, source
+    except tokenize.TokenError:
+        pass
 
     return Language.ENG, source
 
