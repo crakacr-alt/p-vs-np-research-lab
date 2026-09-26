@@ -25,6 +25,7 @@ _RUS_KEYWORDS = {
     "в": "in",
     "прервать": "break",
     "продолжить": "continue",
+    "пропустить": "pass",
     "истина": "True",
     "ложь": "False",
     "пусто": "None",
@@ -38,6 +39,7 @@ _RUS_KEYWORDS = {
 
 _ENG_KEYWORDS = {
     "function": "def",
+    "elseif": "elif",
     "true": "True",
     "false": "False",
     "null": "None",
@@ -58,6 +60,13 @@ _RUS_BUILTINS = {
     "решить_sat": "solve_sat",
     "проверить": "assert_true",
     "тип": "type_name",
+    "добавить": "append",
+    "верхний": "upper",
+    "нижний": "lower",
+    "разделить": "split",
+    "соединить": "join",
+    "json_код": "json_encode",
+    "json_декод": "json_decode",
 }
 
 _RUS_MODULES = {
@@ -115,6 +124,9 @@ def translate_source(source: str) -> tuple[Language, str]:
     """
 
     language, body = detect_language(source)
+    if language == Language.RUS:
+        body = re.sub(r"\bиначе\s+если\b", "иначеесли", body, flags=re.IGNORECASE)
+
     body = _remove_let_prefix(body, language)
 
     keyword_map = _RUS_KEYWORDS if language == Language.RUS else _ENG_KEYWORDS
