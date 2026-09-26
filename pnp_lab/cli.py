@@ -188,6 +188,12 @@ def turing_command(args):
             )
 
 
+def lang_command(args):
+    from .labscript.cli import main as labscript_main
+
+    labscript_main(args.lab_args)
+
+
 def hypothesis_add_command(args):
     database = ResearchDatabase(args.db)
     hypothesis_id = database.add_hypothesis(args.title, args.statement, args.notes)
@@ -285,6 +291,13 @@ def build_parser():
     turing_parser.add_argument("--max-steps", type=int, default=10_000)
     turing_parser.add_argument("--trace", action="store_true")
     turing_parser.set_defaults(handler=turing_command)
+
+    lang_parser = commands.add_parser(
+        "lang",
+        help="LabScript: run/check/debug/build bilingual programs",
+    )
+    lang_parser.add_argument("lab_args", nargs=argparse.REMAINDER)
+    lang_parser.set_defaults(handler=lang_command)
 
     hypothesis = commands.add_parser("hypothesis", help="журнал исследовательских гипотез")
     hypothesis_commands = hypothesis.add_subparsers(dest="hypothesis_command", required=True)
