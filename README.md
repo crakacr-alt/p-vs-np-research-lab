@@ -1,14 +1,17 @@
 # P vs NP Research Lab
 
+[English README](README_EN.md)
+
 [![tests](https://github.com/crakacr-alt/p-vs-np-research-lab/actions/workflows/tests.yml/badge.svg)](https://github.com/crakacr-alt/p-vs-np-research-lab/actions/workflows/tests.yml)
 [![CodeQL](https://github.com/crakacr-alt/p-vs-np-research-lab/actions/workflows/codeql.yml/badge.svg)](https://github.com/crakacr-alt/p-vs-np-research-lab/actions/workflows/codeql.yml)
 
 
-**P vs NP Research Lab** — открытая научно-исследовательская лаборатория для
-воспроизводимых экспериментов с SAT, точными алгоритмами, трудными экземплярами
-и переключением математических представлений.
+**P vs NP Research Lab** — открытая проверяемая вычислительная лаборатория: SAT,
+точные алгоритмы, представления, воспроизводимые эксперименты и собственный
+двуязычный язык LabScript. Проект развивается к универсальной платформе, где
+символьные, численные и формальные движки можно перепроверять независимо.
 
-> **Релиз:** 1.1.3  
+> **Релиз:** 1.2.0  
 > **Научный статус:** проект не является доказательством `P = NP` или `P != NP`.
 
 ## Что эта схема даёт на практике уже сейчас
@@ -51,6 +54,68 @@ SAT / UNSAT
    и траекторию вычисления.
 
 Подробнее: [Практическое применение](docs/PRACTICAL_USE.md).
+
+## LabScript 0.1 — новое в 1.2
+
+LabScript позволяет использовать лабораторию как самостоятельную программируемую
+систему, без Python-кода и без обязательного подключения нейросети.
+
+Русский:
+
+```lab
+Язык="-РУС"
+
+функция квадрат(x):
+    вернуть x * x
+
+для i в диапазон(1, 6):
+    печать(i, квадрат(i))
+```
+
+English:
+
+```lab
+LangRule="-ENG"
+
+function square(x):
+    return x * x
+
+for i in range(1, 6):
+    print(i, square(i))
+```
+
+Уже работают:
+
+- обычные программы: переменные, функции, условия, циклы, lists/maps;
+- русские и английские ключевые слова в одном runtime;
+- локальные `.lab`-модули;
+- безопасно подключаемые host-модули для предприятий и научных engines;
+- `math`, `crypto`, `sat`; JSON, Base64 и hashing;
+- `run`, `check`, `debug`, `build`, `verify`, `hash`, encode/decode;
+- детерминированные `.labpkg` с SHA-256;
+- Jupyter magic `%%lab`;
+- выполнение `lab`-блоков из Markdown/Obsidian;
+- CI на Windows, Linux и macOS.
+
+Быстрый старт:
+
+```bash
+labscript new hello.lab --lang RUS
+labscript check hello.lab
+labscript run hello.lab
+labscript build hello.lab
+labscript verify hello.labpkg
+```
+
+То же через основной CLI:
+
+```bash
+pnp-lab lang run hello.lab
+```
+
+Документация: [LabScript RU](docs/LABSCRIPT_RU.md),
+[LabScript EN](docs/LABSCRIPT_EN.md),
+[Jupyter / Obsidian / platforms](docs/INTEGRATIONS.md).
 
 ## Что входит в 1.1
 
@@ -356,6 +421,11 @@ C:\...\p-vs-np-research-lab\.venv\Scripts\python.exe
 - [Release notes 1.1.1](docs/RELEASE_1.1.1.md)
 - [Release notes 1.1.2](docs/RELEASE_1.1.2.md)
 - [Release notes 1.1.3](docs/RELEASE_1.1.3.md)
+- [Release notes 1.2.0](docs/RELEASE_1.2.0.md)
+- [LabScript RU](docs/LABSCRIPT_RU.md)
+- [LabScript EN](docs/LABSCRIPT_EN.md)
+- [Интеграции](docs/INTEGRATIONS.md)
+- [Scientific platform direction](docs/SCIENTIFIC_PLATFORM.md)
 - [Solver heuristics](docs/SOLVER_HEURISTICS.md)
 - [Release process](docs/RELEASE_PROCESS.md)
 

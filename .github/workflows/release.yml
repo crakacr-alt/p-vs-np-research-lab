@@ -38,6 +38,10 @@ jobs:
           python -m unittest discover -s property_tests -v
           ruff check pnp_lab tests property_tests
           pnp-lab doctor
+          labscript check examples/labscript_russian.lab
+          labscript run examples/labscript_english.lab
+          labscript build examples/labscript_english.lab -o /tmp/release-demo.labpkg
+          labscript verify /tmp/release-demo.labpkg
 
       - name: Build package
         run: |

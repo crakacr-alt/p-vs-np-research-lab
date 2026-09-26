@@ -1,165 +1,113 @@
-# Архитектура проекта 1.1
+# Архитектура проекта 1.2
 
 ## Основной принцип
 
-Проект разделён на четыре слоя:
+Лаборатория разделена на независимые слои:
 
-1. exact solving;
-2. representation switching;
-3. scientific experiments;
-4. AI/MCP orchestration.
+1. frontends;
+2. programmable runtime;
+3. exact/scientific engines;
+4. verification;
+5. experiments/provenance;
+6. AI orchestration.
 
-Ни один верхний слой не должен подменять корректность нижнего.
+Верхний слой не имеет права объявлять результат более надёжным, чем позволяет
+нижний verifier.
+
+## Frontends
+
+Пользователь может работать через LabScript, Python API, CLI, Jupyter,
+Markdown/Obsidian и MCP/AI.
+
+Ни один frontend не является источником истины.
+
+## LabScript layer
+
+Каталог pnp_lab/labscript.
+
+language.py определяет RU/ENG mode и нормализует двуязычные keywords, не меняя
+строки и комментарии.
+
+runtime.py содержит собственный interpreter: разрешённый AST subset,
+functions/loops/conditions/collections, local scopes, step limit,
+source-located errors, local .lab modules и explicit host modules.
+Произвольный Python exec не используется.
+
+stdlib.py содержит portable standard library: math, crypto, SAT,
+JSON/Base64/hash и базовые collection/string helpers.
+
+package.py реализует .labpkg: dependency-aware source bundle,
+deterministic ZIP metadata, language version, SHA-256 каждого файла и safe
+extraction.
+
+jupyter.py и markdown.py используют тот же LabRuntime. Отдельной реализации
+языка для notebook или Obsidian нет.
 
 ## Exact solving
 
-### `cnf.py`
+cnf.py хранит CNF, DIMACS и независимую проверку SAT model.
 
-- структура CNF;
-- DIMACS import/export;
-- независимая проверка SAT model.
+dpll.py — простой baseline exact solver.
 
-### `dpll.py`
+hybrid.py использует propagation, pure literals, union-find decomposition,
+UNSAT cache и Jeroslow-Wang branching.
 
-Простой baseline.
+switch_solver.py и xor.py реализуют точное representation switching
+CNF -> XOR -> GF(2).
 
-### `hybrid.py`
+## Verification
 
-Точный solver с:
+bruteforce.py — независимый oracle для маленьких формул.
 
-- unit propagation;
-- pure literal elimination;
-- independent component decomposition;
-- UNSAT memoization;
-- DPLL branching.
+verification.py сравнивает DPLL, Hybrid, RepresentationSwitching, brute force и
+optional PySAT. Property tests дополнительно генерируют случайные маленькие CNF.
 
-### `bruteforce.py`
+## Formal computation model
 
-Медленный независимый oracle для маленьких задач.
+turing_machine.py содержит отдельную deterministic single-tape Turing Machine.
+Она не является ускорителем SAT, а служит формальной вычислительной моделью.
 
-## Representation layer
+## Experiments
 
-### `xor.py`
+benchmarks.py, benchmark_runner.py, experiments.py, complexity.py и
+hard_search.py дают reproducible inputs, logical metrics, CSV/JSON/Markdown,
+complexity fits и adversarial hard-case search.
 
-- распознаёт точную XOR3-кодировку в CNF;
-- хранит `XOREquation`;
-- выполняет Gaussian elimination над GF(2);
-- выводит XOR unit assignments;
-- строит одно решение линейной системы.
+Benchmark не превращается автоматически в theorem/proof.
 
-### `switch_solver.py`
+## Research provenance
 
-Связывает CNF и XOR.
+research_db.py хранит гипотезы. Автоматического статуса PROVED нет.
 
-```text
-original CNF
-    |
-detect XOR3
-    |
-    +--> remaining CNF ----+
-    |                      |
-    +--> XOR equations ----+
-                           |
-                      shared model
-                           |
-                SAT / UNSAT + metrics
-```
+## MCP
 
-Это первый working representation switch проекта.
+mcp_server.py даёт AI только научные инструменты.
+workspace.py ограничивает файловый доступ PNP_LAB_WORKSPACE.
 
-## Computational model layer
+## Extension boundary
 
-### `turing_machine.py`
+LabScript host modules и будущий engine registry — место для подключения:
 
-Отдельная формальная модель вычисления:
+- production SAT/CDCL;
+- SMT;
+- symbolic math;
+- Lean;
+- rigorous numerics;
+- ODE/PDE;
+- visualization;
+- enterprise/private libraries.
 
-- deterministic single-tape Turing Machine;
-- разреженная лента с отрицательными и положительными индексами;
-- JSON transition table;
-- accept/reject;
-- step limit;
-- trace.
+Parser/runtime не должны напрямую зависеть от тяжёлых backends.
 
-Этот слой не является частью SAT solver-а. Он нужен для связи экспериментов с
-классической теорией вычислимости и сложности.
+## Почему слои разделены
 
-## Benchmark layer
+Это позволяет отдельно ответить:
 
-### `benchmarks.py`
+- кто сформулировал задачу;
+- какой engine её решал;
+- как получен результат;
+- кто его проверил;
+- какой уровень доверия допустим;
+- можно ли повторить эксперимент.
 
-Структурные семейства:
-
-- random 3-SAT;
-- Pigeonhole Principle;
-- independent components;
-- XOR chains;
-- inconsistent XOR core.
-
-### `benchmark_runner.py`
-
-Одинаковые задачи прогоняются через несколько solver-ов.
-
-Сохраняются:
-
-- CSV;
-- JSON;
-- Markdown report.
-
-### `experiments.py`
-
-Growth experiment по размеру random 3-SAT.
-
-### `complexity.py`
-
-Empirical fit:
-
-- `C*n^k`;
-- `C*a^n`.
-
-Fit не считается доказательством асимптотики.
-
-### `hard_search.py`
-
-Adversarial search против текущего solver-а.
-
-## Verification layer
-
-### `verification.py`
-
-Сравнивает:
-
-- DPLL;
-- Hybrid;
-- RepresentationSwitchingSolver;
-- brute force, если включён;
-- PySAT, если установлен.
-
-## Research layer
-
-### `research_db.py`
-
-SQLite-журнал гипотез.
-
-Нет автоматического статуса `PROVED`.
-
-## MCP layer
-
-### `mcp_server.py`
-
-AI получает ограниченный набор научных инструментов.
-
-### `workspace.py`
-
-Файлы MCP разрешены только внутри `PNP_LAB_WORKSPACE`.
-
-Это важно, потому что исследовательскому агенту не нужен произвольный доступ к
-остальной файловой системе.
-
-## Почему не всё сделано одним solver-ом
-
-Для исследования важно видеть, какое улучшение что меняет.
-
-Если сразу использовать огромный black-box solver, трудно понять причину
-ускорения.
-
-Поэтому baseline, hybrid и switch существуют отдельно.
+Для научного проекта это важнее, чем один большой black-box solver.

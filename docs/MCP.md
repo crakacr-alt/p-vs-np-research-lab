@@ -152,3 +152,29 @@ prove_p_equals_np()
 
 Результат эксперимента не должен автоматически превращаться в математическое
 доказательство.
+
+
+## LabScript через MCP
+
+В 1.2 добавлен инструмент run_labscript_file.
+
+Он принимает только .lab-файл внутри PNP_LAB_WORKSPACE:
+
+```text
+run_labscript_file(
+    path="experiments/model.lab",
+    max_steps=100000
+)
+```
+
+Для MCP-запуска:
+
+- path сначала проходит safe_workspace_path;
+- принимаются только .lab files;
+- max_steps ограничивается диапазоном 1..1_000_000;
+- LABSCRIPT_PATH отключён;
+- local imports ищутся рядом с разрешённым .lab-файлом;
+- arbitrary Python imports/attributes в LabScript не открываются.
+
+Это позволяет AI использовать тот же код, который человек запускает через
+labscript run, Jupyter или Obsidian, без отдельной реализации программы.

@@ -2,6 +2,42 @@
 
 Все заметные изменения проекта фиксируются здесь.
 
+## 1.2.0 — 2026-09-26
+
+### LabScript 0.1
+
+- добавлен собственный двуязычный язык программирования RU/EN;
+- директивы `Язык="-РУС"` и `LangRule="-ENG"`;
+- функции, условия, циклы, collections, Unicode identifiers и локальные модули;
+- встроенные `math`, `crypto`, `sat`, JSON/Base64/hash helpers;
+- explicit host-module API для будущих Lean/Z3/SymPy/PDE и корпоративных расширений;
+- закрыт произвольный доступ к Python object attributes/imports;
+- step limit для базовой защиты от бесконечных циклов.
+
+### Tooling
+
+- standalone CLI `labscript` и bridge `pnp-lab lang`;
+- команды run/check/debug/build/verify/hash/encode64/decode64/new/markdown;
+- детерминированный `.labpkg`;
+- package manifest содержит версию языка и SHA-256 исходников;
+- build включает только реально импортируемые локальные `.lab`-модули;
+- safe extraction без `extractall` и проверка package paths;
+- Jupyter `%lab` / `%%lab`;
+- Markdown/Obsidian fenced-block runner;
+- Windows/Linux/macOS CI для языка.
+
+### Проверка
+
+- полный старый test suite продолжает проходить;
+- добавлены unit/integration tests русского и английского синтаксиса;
+- проверяются локальные и host-модули, SAT/crypto/JSON, step limit;
+- проверяется воспроизводимость `.labpkg` и path traversal rejection.
+
+### Direction
+
+- зафиксирована архитектура будущих exact/SMT/symbolic/formal/rigorous/PDE engines;
+- LabScript host modules становятся общей границей расширения научной платформы.
+
 ## 1.1.3 — 2026-09-25
 
 ### Solver efficiency

@@ -1,0 +1,25 @@
+LangRule="-ENG"
+
+# A normal program plus exact SAT from the same language.
+function fibonacci(n):
+    if n < 2:
+        return n
+
+    let a = 0
+    let b = 1
+
+    for i in range(2, n + 1):
+        let next_value = a + b
+        a = b
+        b = next_value
+
+    return b
+
+print("fib(10) =", fibonacci(10))
+
+import crypto
+print("sha256 =", crypto.hash("LabScript"))
+
+import sat
+let answer = sat.solve(2, [[1, 2], [-1, 2]])
+print("SAT =", answer["sat"])

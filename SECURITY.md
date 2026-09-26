@@ -79,3 +79,29 @@ Optional зависимости:
 4. команду запуска;
 5. commit SHA;
 6. версию Python.
+
+
+## LabScript
+
+LabScript 0.1 специально не даёт программе произвольный доступ к Python runtime.
+
+По умолчанию:
+
+- нельзя импортировать случайный Python package;
+- нельзя обращаться к обычным Python object attributes;
+- нет shell/process API;
+- нет прямого file/network API;
+- local module name не может содержать path traversal;
+- .labpkg проверяет SHA-256 каждого source file;
+- package extraction не использует слепой extractall;
+- runtime имеет statement step limit.
+
+Host application может явно передать ModuleNamespace. Безопасность функций
+внутри такого host-модуля уже является ответственностью самого host-приложения.
+
+Важно: LabScript 0.1 — не OS sandbox. Ограничение числа statements не ограничивает
+RAM, время тяжёлой встроенной операции или ресурсы host-модуля. Для недоверенного
+кода нужен отдельный process/container sandbox с лимитами CPU/RAM/filesystem.
+
+Portable .labpkg даёт integrity check, но пока не даёт publisher authenticity.
+Package signing запланирован для 1.2.x.
