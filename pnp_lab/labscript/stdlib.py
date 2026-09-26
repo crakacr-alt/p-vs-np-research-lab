@@ -73,6 +73,35 @@ def assert_true(value, message="assertion failed"):
     return True
 
 
+def append(value, item):
+    value.append(item)
+    return value
+
+
+def upper(value):
+    return str(value).upper()
+
+
+def lower(value):
+    return str(value).lower()
+
+
+def split(value, separator=None):
+    return str(value).split(separator)
+
+
+def join(separator, values):
+    return str(separator).join(str(item) for item in values)
+
+
+def json_encode(value):
+    return json.dumps(value, ensure_ascii=False, sort_keys=True)
+
+
+def json_decode(value):
+    return json.loads(str(value))
+
+
 def type_name(value):
     names = {
         bool: "bool",
@@ -153,6 +182,13 @@ def default_builtins(output):
         "solve_sat": solve_sat,
         "assert_true": assert_true,
         "type_name": type_name,
+        "append": append,
+        "upper": upper,
+        "lower": lower,
+        "split": split,
+        "join": join,
+        "json_encode": json_encode,
+        "json_decode": json_decode,
     }
 
 
