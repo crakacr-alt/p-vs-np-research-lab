@@ -50,12 +50,8 @@ class Environment:
         self.values[name] = value
 
     def assign(self, name, value):
-        env = self
-        while env is not None:
-            if name in env.values:
-                env.values[name] = value
-                return
-            env = env.parent
+        # Assignment is local to the current scope. Functions can read outer
+        # values, but do not silently overwrite them.
         self.values[name] = value
 
 
@@ -102,6 +98,7 @@ _ALLOWED_AST = (
     ast.Return,
     ast.Break,
     ast.Continue,
+    ast.Pass,
     ast.List,
     ast.Tuple,
     ast.Dict,
@@ -188,6 +185,10 @@ def parse_source(source: str, filename="<labscript>"):
             if node.decorator_list or node.returns is not None:
                 raise LabScriptSyntaxError(
                     f"{filename}:{node.lineno}: decorators/type returns are not supported"
+                )
+            if node.args.defaults or node.args.kw_defaults:
+                raise LabScriptSyntaxError(
+                    f"{filename}:{node.lineno}: default arguments are not supported yet"
                 )
             if node.args.vararg or node.args.kwarg or node.args.kwonlyargs:
                 raise LabScriptSyntaxError(
@@ -341,6 +342,9 @@ class LabRuntime:
 
         if isinstance(node, ast.Continue):
             raise _ContinueSignal()
+
+        if isinstance(node, ast.Pass):
+            return None
 
         if isinstance(node, ast.Import):
             for alias in node.names:
