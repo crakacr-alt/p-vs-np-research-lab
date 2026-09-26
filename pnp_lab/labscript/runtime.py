@@ -17,6 +17,10 @@ class LabScriptSyntaxError(LabScriptError):
     pass
 
 
+class LabScriptRuntimeError(LabScriptError):
+    pass
+
+
 class StepLimitError(LabScriptError):
     pass
 
@@ -216,6 +220,7 @@ class LabRuntime:
         self.trace = trace
         self.module_paths = [Path(path).resolve() for path in (module_paths or [])]
         self.module_cache = {}
+        self.current_filename = "<labscript>"
         self.modules = dict(BUILTIN_MODULES)
         if modules:
             self.modules.update(modules)
@@ -226,15 +231,20 @@ class LabRuntime:
     def execute(self, source: str, *, filename="<labscript>", env=None):
         _, _, tree = parse_source(source, filename)
         target = env or self.globals
+        previous_filename = self.current_filename
+        self.current_filename = filename
         try:
-            self._exec_block(tree.body, target)
-        except _ReturnSignal as signal:
-            raise LabScriptError("return used outside a function") from signal
-        except _BreakSignal as signal:
-            raise LabScriptError("break used outside a loop") from signal
-        except _ContinueSignal as signal:
-            raise LabScriptError("continue used outside a loop") from signal
-        return target
+            try:
+                self._exec_block(tree.body, target)
+            except _ReturnSignal as signal:
+                raise LabScriptError("return used outside a function") from signal
+            except _BreakSignal as signal:
+                raise LabScriptError("break used outside a loop") from signal
+            except _ContinueSignal as signal:
+                raise LabScriptError("continue used outside a loop") from signal
+            return target
+        finally:
+            self.current_filename = previous_filename
 
     def execute_file(self, path):
         path = Path(path).resolve()
@@ -277,7 +287,18 @@ class LabRuntime:
 
     def _exec_block(self, statements, env):
         for statement in statements:
-            self._exec_statement(statement, env)
+            try:
+                self._exec_statement(statement, env)
+            except (_ReturnSignal, _BreakSignal, _ContinueSignal):
+                raise
+            except LabScriptRuntimeError:
+                raise
+            except Exception as error:
+                line = getattr(statement, "lineno", "?")
+                message = str(error) or type(error).__name__
+                raise LabScriptRuntimeError(
+                    f"{self.current_filename}:{line}: {message}"
+                ) from error
 
     def _exec_statement(self, node, env):
         self._tick(node, env)
