@@ -142,6 +142,28 @@ print(result["sat"])
         )
         self.assertEqual(output.getvalue(), "120.0\n")
 
+    def test_destructuring_in_loop(self):
+        source = '''Язык="-РУС"
+пусть сумма_значений = 0
+для индекс, значение в enumerate([10, 20, 30]):
+    сумма_значений += индекс + значение
+печать(сумма_значений)
+'''
+        output, _ = self.run_program(source)
+        self.assertEqual(output, "63\n")
+
+    def test_chained_assignment(self):
+        source = '''LangRule="-ENG"
+a = b = 7
+print(a + b)
+'''
+        output, _ = self.run_program(source)
+        self.assertEqual(output, "14\n")
+
+    def test_invalid_top_level_return_has_friendly_error(self):
+        with self.assertRaisesRegex(LabScriptError, "return used outside"):
+            self.run_program('LangRule="-ENG"\nreturn 1\n')
+
     def test_python_object_attributes_are_blocked(self):
         with self.assertRaises(LabScriptError):
             self.run_program('LangRule="-ENG"\nprint((1).__class__)\n')
