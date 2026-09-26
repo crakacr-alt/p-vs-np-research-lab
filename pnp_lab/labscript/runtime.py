@@ -272,7 +272,9 @@ class LabRuntime:
         self._tick(node, env)
 
         if isinstance(node, ast.Expr):
-            return self._eval(node.value, env)
+            value = self._eval(node.value, env)
+            env.set("_", value)
+            return value
 
         if isinstance(node, ast.Assign):
             if len(node.targets) != 1:
