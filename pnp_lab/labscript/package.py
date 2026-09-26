@@ -1,3 +1,4 @@
+import ast
 import hashlib
 import json
 import tempfile
@@ -5,6 +6,8 @@ import zipfile
 from pathlib import Path
 
 from .language import detect_language
+from .runtime import parse_source
+from .stdlib import BUILTIN_MODULES
 
 
 PACKAGE_FORMAT = 1
@@ -18,6 +21,43 @@ def file_sha256(path):
     return digest.hexdigest()
 
 
+def _collect_sources(main_file):
+    root = main_file.parent
+    found = {}
+
+    def visit(path):
+        path = path.resolve()
+        if path.name in found:
+            return
+
+        source = path.read_text(encoding="utf-8")
+        _, _, tree = parse_source(source, filename=str(path))
+        found[path.name] = path
+
+        names = set()
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                names.update(alias.name for alias in node.names)
+            elif isinstance(node, ast.ImportFrom) and node.module:
+                names.add(node.module)
+
+        for name in sorted(names):
+            if name in BUILTIN_MODULES:
+                continue
+            if not name or "." in name or "/" in name or "\\" in name:
+                raise ValueError(f"non-portable module name: {name!r}")
+
+            candidate = root / f"{name}.lab"
+            if not candidate.is_file():
+                raise ValueError(
+                    f"portable build cannot find local module {name!r} next to {main_file.name}"
+                )
+            visit(candidate)
+
+    visit(main_file)
+    return [found[name] for name in sorted(found)]
+
+
 def build_package(main_file, output_file=None):
     main_file = Path(main_file).resolve()
 
@@ -27,10 +67,8 @@ def build_package(main_file, output_file=None):
     source = main_file.read_text(encoding="utf-8")
     language, _ = detect_language(source)
     output_file = Path(output_file or main_file.with_suffix(".labpkg")).resolve()
+    sources = _collect_sources(main_file)
 
-    # First package format keeps all local .lab modules from the same folder.
-    # No hidden dependency download happens during build or run.
-    sources = sorted(main_file.parent.glob("*.lab"))
     manifest = {
         "format": PACKAGE_FORMAT,
         "main": main_file.name,
@@ -50,6 +88,12 @@ def build_package(main_file, output_file=None):
     return output_file, manifest
 
 
+def _validate_name(name):
+    path = Path(name)
+    if path.name != name or path.suffix != ".lab" or name in {"", ".", ".."}:
+        raise ValueError(f"unsafe package file name: {name!r}")
+
+
 def verify_package(path):
     path = Path(path)
 
@@ -61,7 +105,13 @@ def verify_package(path):
                 f"unsupported LabScript package format: {manifest.get('format')}"
             )
 
-        for name, expected in manifest.get("files", {}).items():
+        files = manifest.get("files", {})
+        main = manifest.get("main")
+        if main not in files:
+            raise ValueError("package main file is missing from manifest")
+
+        for name, expected in files.items():
+            _validate_name(name)
             payload = archive.read(f"src/{name}")
             actual = hashlib.sha256(payload).hexdigest()
             if actual != expected:
@@ -75,12 +125,15 @@ def run_package(path, runtime):
     manifest = verify_package(path)
 
     with tempfile.TemporaryDirectory(prefix="labscript-") as temp_dir:
-        temp_dir = Path(temp_dir)
+        source_dir = Path(temp_dir) / "src"
+        source_dir.mkdir()
 
         with zipfile.ZipFile(path, "r") as archive:
-            archive.extractall(temp_dir)
+            for name in manifest["files"]:
+                _validate_name(name)
+                payload = archive.read(f"src/{name}")
+                (source_dir / name).write_bytes(payload)
 
-        source_dir = temp_dir / "src"
         runtime.module_paths.insert(0, source_dir)
         try:
             runtime.execute_file(source_dir / manifest["main"])
