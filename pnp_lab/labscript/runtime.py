@@ -226,7 +226,14 @@ class LabRuntime:
     def execute(self, source: str, *, filename="<labscript>", env=None):
         _, _, tree = parse_source(source, filename)
         target = env or self.globals
-        self._exec_block(tree.body, target)
+        try:
+            self._exec_block(tree.body, target)
+        except _ReturnSignal as signal:
+            raise LabScriptError("return used outside a function") from signal
+        except _BreakSignal as signal:
+            raise LabScriptError("break used outside a loop") from signal
+        except _ContinueSignal as signal:
+            raise LabScriptError("continue used outside a loop") from signal
         return target
 
     def execute_file(self, path):
@@ -281,10 +288,9 @@ class LabRuntime:
             return value
 
         if isinstance(node, ast.Assign):
-            if len(node.targets) != 1:
-                raise LabScriptError("multiple assignment targets are not supported")
             value = self._eval(node.value, env)
-            self._assign_target(node.targets[0], value, env)
+            for target in node.targets:
+                self._assign_target(target, value, env)
             return None
 
         if isinstance(node, ast.AugAssign):
@@ -489,7 +495,15 @@ class LabRuntime:
             container[index] = value
             return
 
-        raise LabScriptError("assignment target must be a variable or index")
+        if isinstance(target, (ast.Tuple, ast.List)):
+            items = list(value)
+            if len(items) != len(target.elts):
+                raise LabScriptError("unpack target and value have different lengths")
+            for nested_target, nested_value in zip(target.elts, items):
+                self._assign_target(nested_target, nested_value, env)
+            return
+
+        raise LabScriptError("unsupported assignment target")
 
     def _load_module(self, name):
         if name in self.modules:
