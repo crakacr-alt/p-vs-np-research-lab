@@ -5,6 +5,7 @@ MCP позволяет модели запускать только явно о�
 """
 
 from dataclasses import asdict
+import io
 
 from . import __version__
 
@@ -13,6 +14,8 @@ from .cnf import load_dimacs, save_dimacs
 from .doctor import run_doctor
 from .experiments import run_growth_experiment, summarize_growth
 from .hard_search import search_hard_case
+from .labscript.language import detect_language
+from .labscript.runtime import LabRuntime
 from .research_db import ResearchDatabase
 from .switch_solver import RepresentationSwitchingSolver
 from .turing_machine import load_turing_machine
@@ -35,7 +38,7 @@ def build_server():
 
         return {
             "version": __version__,
-            "goal": "Воспроизводимые эксперименты с точными SAT-алгоритмами",
+            "goal": "Проверяемые вычислительные исследования: SAT, LabScript и расширяемые engines",
             "main_solver": RepresentationSwitchingSolver.name,
             "implemented_switch": "точное распознавание 3-CNF XOR -> GF(2)",
             "claim": "Проект НЕ является доказательством P = NP или P != NP",
@@ -135,6 +138,35 @@ def build_server():
             "sat": case.sat,
             "saved": str(output),
             "warning": "Это стресс-тест, а не математический контрпример P vs NP.",
+        }
+
+    @mcp.tool()
+    def run_labscript_file(
+        path: str,
+        max_steps: int = 100_000,
+    ) -> dict:
+        """Запустить LabScript-файл внутри PNP_LAB_WORKSPACE."""
+
+        safe_path = safe_workspace_path(path)
+        if safe_path.suffix != ".lab":
+            raise ValueError("LabScript MCP tool принимает только .lab files")
+
+        bounded_steps = max(1, min(int(max_steps), 1_000_000))
+        source = safe_path.read_text(encoding="utf-8")
+        language, _ = detect_language(source)
+        output = io.StringIO()
+        runtime = LabRuntime(
+            output=output,
+            max_steps=bounded_steps,
+            module_paths=[safe_path.parent],
+            use_env_module_path=False,
+        )
+        runtime.execute(source, filename=str(safe_path))
+
+        return {
+            "language": language.value,
+            "steps": runtime.steps,
+            "output": output.getvalue(),
         }
 
     @mcp.tool()
