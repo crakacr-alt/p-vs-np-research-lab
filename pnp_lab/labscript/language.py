@@ -98,8 +98,6 @@ def detect_language(source: str) -> tuple[Language, str]:
         lines[first_content] = ""
         return language, "\n".join(lines)
 
-    # Без директивы не угадываем смысл программы агрессивно.
-    # Русские управляющие слова — достаточно сильный сигнал.
     lowered = source.lower()
     if any(re.search(rf"\b{re.escape(word)}\b", lowered) for word in _RUS_KEYWORDS):
         return Language.RUS, source
@@ -107,28 +105,34 @@ def detect_language(source: str) -> tuple[Language, str]:
     return Language.ENG, source
 
 
-def _remove_let_prefix(source: str, language: Language) -> str:
-    word = "пусть" if language == Language.RUS else "let"
-    pattern = re.compile(rf"^(\s*){word}\s+([\w\u0400-\u04ff]+\s*=)", re.IGNORECASE)
+def _add_edit(edits, line, start, end, replacement):
+    edits.setdefault(line, []).append((start, end, replacement))
 
-    lines = []
-    for line in source.splitlines():
-        lines.append(pattern.sub(r"\1\2", line))
-    return "\n".join(lines)
+
+def _apply_edits(source, edits):
+    lines = source.splitlines(keepends=True)
+
+    for line_number, line_edits in edits.items():
+        index = line_number - 1
+        if index < 0 or index >= len(lines):
+            continue
+
+        line = lines[index]
+        for start, end, replacement in sorted(
+            line_edits,
+            key=lambda item: item[0],
+            reverse=True,
+        ):
+            line = line[:start] + replacement + line[end:]
+        lines[index] = line
+
+    return "".join(lines)
 
 
 def translate_source(source: str) -> tuple[Language, str]:
-    """Переводит ключевые слова LabScript в нейтральный parser syntax.
-
-    Строки и комментарии не изменяются: замены проходят через tokenizer.
-    """
+    """Нормализует LabScript keywords, не меняя строки и комментарии."""
 
     language, body = detect_language(source)
-    if language == Language.RUS:
-        body = re.sub(r"\bиначе\s+если\b", "иначеесли", body, flags=re.IGNORECASE)
-
-    body = _remove_let_prefix(body, language)
-
     keyword_map = _RUS_KEYWORDS if language == Language.RUS else _ENG_KEYWORDS
     name_map = {}
 
@@ -136,24 +140,73 @@ def translate_source(source: str) -> tuple[Language, str]:
         name_map.update(_RUS_BUILTINS)
         name_map.update(_RUS_MODULES)
 
-    tokens = []
-    reader = io.StringIO(body).readline
+    try:
+        tokens = list(tokenize.generate_tokens(io.StringIO(body).readline))
+    except tokenize.TokenError:
+        # ast.parse ниже сформирует основную syntax diagnostic.
+        return language, body
 
-    for token in tokenize.generate_tokens(reader):
-        if token.type == tokenize.NAME:
-            replacement = keyword_map.get(token.string.lower())
-            if replacement is None:
-                replacement = name_map.get(token.string.lower())
+    edits = {}
+    let_word = "пусть" if language == Language.RUS else "let"
+    phrase_first = "иначе" if language == Language.RUS else "else"
+    phrase_second = "если" if language == Language.RUS else "if"
 
-            if replacement is not None:
-                token = tokenize.TokenInfo(
-                    token.type,
-                    replacement,
-                    token.start,
-                    token.end,
-                    token.line,
-                )
+    index = 0
+    while index < len(tokens):
+        token = tokens[index]
 
-        tokens.append(token)
+        if token.type != tokenize.NAME:
+            index += 1
+            continue
 
-    return language, tokenize.untokenize(tokens)
+        lowered = token.string.lower()
+
+        # "иначе если" / "else if" считаем одним keyword. Работаем по token
+        # positions, поэтому такая фраза внутри string/comment не затрагивается.
+        if (
+            lowered == phrase_first
+            and index + 1 < len(tokens)
+            and tokens[index + 1].type == tokenize.NAME
+            and tokens[index + 1].string.lower() == phrase_second
+            and tokens[index + 1].start[0] == token.start[0]
+        ):
+            second = tokens[index + 1]
+            _add_edit(
+                edits,
+                token.start[0],
+                token.start[1],
+                second.end[1],
+                "elif",
+            )
+            index += 2
+            continue
+
+        # let/пусть — синтаксический сахар. Удаляем keyword и пробелы до
+        # следующего identifier, но только когда tokenizer видит настоящий NAME.
+        if lowered == let_word:
+            end = token.end[1]
+            if (
+                index + 1 < len(tokens)
+                and tokens[index + 1].start[0] == token.start[0]
+            ):
+                end = tokens[index + 1].start[1]
+            _add_edit(edits, token.start[0], token.start[1], end, "")
+            index += 1
+            continue
+
+        replacement = keyword_map.get(lowered)
+        if replacement is None:
+            replacement = name_map.get(lowered)
+
+        if replacement is not None:
+            _add_edit(
+                edits,
+                token.start[0],
+                token.start[1],
+                token.end[1],
+                replacement,
+            )
+
+        index += 1
+
+    return language, _apply_edits(body, edits)
